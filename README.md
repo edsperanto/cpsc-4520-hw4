@@ -14,4 +14,7 @@ Weaknesses
 - 
 
 Instructions
-- 
+- `$ make`
+- `$ ./places` in first terminal
+- `$ ./airports` in second terminal
+- `$ ./client localhost <city> <state>` in third terminal
