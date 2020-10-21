@@ -6,34 +6,6 @@
 #include "airports.h"
 
 bool_t
-xdr_kdTree (XDR *xdrs, kdTree *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_pointer (xdrs, (char **)&objp->root, sizeof (struct kdNode), (xdrproc_t) xdr_kdNode))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
-xdr_kdNode (XDR *xdrs, kdNode *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_pointer (xdrs, (char **)&objp->pos, sizeof (double), (xdrproc_t) xdr_double))
-		 return FALSE;
-	 if (!xdr_int (xdrs, &objp->dir))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->data, sizeof (struct airport), (xdrproc_t) xdr_airport))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->left, sizeof (kdNode), (xdrproc_t) xdr_kdNode))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->right, sizeof (kdNode), (xdrproc_t) xdr_kdNode))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
 xdr_airport (XDR *xdrs, airport *objp)
 {
 	register int32_t *buf;

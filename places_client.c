@@ -24,11 +24,9 @@ void checkIfInputValid(int argc, char *argv[]);
 cmdInput * populateRequest(char *argv[]);
 
 // function declarations for processing RPC call
-placesRet * findAirportsNearCity(char *host, clientArg *userInput);
+placesRet * findAirportsNearCity(CLIENT *clnt, clientArg *userInput);
 CLIENT * connectToClient(char *host);
 void checkIfResultIsNull(placesRet *result, CLIENT *clnt);
-placesRet * createLocalCopy(placesRet *result);
-airportInfo * copyAirportInfo(airportInfo *curr);
 void disconnectFromClient(CLIENT *clnt, placesRet *result);
 
 // client main function
@@ -36,7 +34,8 @@ int
 main (int argc, char *argv[])
 {
     cmdInput *request = parseCmdLineInput(argc, argv);
-	placesRet *result = findAirportsNearCity(request->host, request->location);
+	CLIENT *clnt = connectToClient(request->host);
+	placesRet *result = findAirportsNearCity(clnt, request->location);
 
     // print places results
     placesLLNode *curr = (result->placesRet_u).airports;
@@ -47,8 +46,7 @@ main (int argc, char *argv[])
         curr = curr->next;
     }
 
-    // TODO: dealloc linked list
-
+    disconnectFromClient(clnt, result);
     exit(0);
 }
 
@@ -81,14 +79,11 @@ populateRequest(char *argv[])
 }
 
 placesRet *
-findAirportsNearCity(char *host, clientArg *userInput)
+findAirportsNearCity(CLIENT *clnt, clientArg *userInput)
 {
-	CLIENT *clnt = connectToClient(host);
 	placesRet *result = airports_near_city_1(userInput, clnt);
     checkIfResultIsNull(result, clnt);
-    placesRet *resultCpy = createLocalCopy(result);
-    disconnectFromClient(clnt, result);
-    return resultCpy;
+    return result;
 }
 
 CLIENT *
@@ -109,31 +104,6 @@ checkIfResultIsNull(placesRet *result, CLIENT *clnt)
 	if (result == (placesRet *) NULL) {
 		clnt_perror(clnt, "call failed");
 	}
-}
-
-placesRet *
-createLocalCopy(placesRet *result) 
-{
-    placesRet *resultCpy = NEW_STRUCT(placesRet);
-    resultCpy->err = result->err;
-    (resultCpy->placesRet_u).airports = NEW_STRUCT(placesLLNode);
-    placesLLNode *curr = (result->placesRet_u).airports;
-    placesLLNode *cpy = (resultCpy->placesRet_u).airports;
-    for (; curr != NULL; curr = curr->next, cpy = cpy->next) {
-        cpy->airport = copyAirportInfo(curr->airport);
-        cpy->next = (curr->next == NULL) ? NULL : NEW_STRUCT(placesLLNode);
-    }
-    return resultCpy;
-}
-
-airportInfo *
-copyAirportInfo(airportInfo *curr) 
-{
-    airportInfo *newNode = (airportInfo *)malloc(sizeof(airportInfo));
-    CPY_STRING(newNode->code, curr->code);
-    CPY_STRING(newNode->name, curr->name);
-    newNode->distance = curr->distance;
-    return newNode;
 }
 
 void

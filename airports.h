@@ -14,20 +14,6 @@ extern "C" {
 #endif
 
 
-struct kdTree {
-	struct kdNode *root;
-};
-typedef struct kdTree kdTree;
-
-struct kdNode {
-	double *pos;
-	int dir;
-	struct airport *data;
-	struct kdNode *left;
-	struct kdNode *right;
-};
-typedef struct kdNode kdNode;
-
 struct airport {
 	char *code;
 	char *name;
@@ -76,16 +62,12 @@ extern int airports_prog_1_freeresult ();
 /* the xdr functions */
 
 #if defined(__STDC__) || defined(__cplusplus)
-extern  bool_t xdr_kdTree (XDR *, kdTree*);
-extern  bool_t xdr_kdNode (XDR *, kdNode*);
 extern  bool_t xdr_airport (XDR *, airport*);
 extern  bool_t xdr_placesArg (XDR *, placesArg*);
 extern  bool_t xdr_airportsLLNode (XDR *, airportsLLNode*);
 extern  bool_t xdr_airportsRet (XDR *, airportsRet*);
 
 #else /* K&R C */
-extern bool_t xdr_kdTree ();
-extern bool_t xdr_kdNode ();
 extern bool_t xdr_airport ();
 extern bool_t xdr_placesArg ();
 extern bool_t xdr_airportsLLNode ();

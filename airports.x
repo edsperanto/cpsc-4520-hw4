@@ -1,15 +1,3 @@
-struct kdTree { 
-    struct kdNode *root; 
-};
-
-struct kdNode {
-    double *pos;
-    int dir;
-    struct airport *data;
-    struct kdNode *left;
-    struct kdNode *right;
-};
-
 struct airport {
     string code<>;
     string name<>;
