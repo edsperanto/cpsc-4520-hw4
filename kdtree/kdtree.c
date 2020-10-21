@@ -6,32 +6,20 @@
 #define NEW_STRING(s) (char *)malloc(strlen(s)+1)
 #define CPY_STRING(dst, src) dst = NEW_STRING(src); strcpy(dst, src)
 
-int cmpLatitude 
-(const void *a_ptr, const void *b_ptr) 
+int 
+cmpLatitude(const void *a_ptr, const void *b_ptr) 
 {
     airport a = *(airport *)a_ptr;
     airport b = *(airport *)b_ptr;
-    if (a.latitude > b.latitude) {
-        return 1;
-    } else if (a.latitude < b.latitude) {
-        return -1;
-    } else {
-        return 0;
-    }
+    return a.latitude < b.latitude ? -1 : a.latitude > b.latitude;
 }
 
-int cmpLongitude 
-(const void *a_ptr, const void *b_ptr) 
+int 
+cmpLongitude(const void *a_ptr, const void *b_ptr) 
 {
     airport a = *(airport *)a_ptr;
     airport b = *(airport *)b_ptr;
-    if (a.longitude > b.longitude) {
-        return 1;
-    } else if (a.longitude < b.longitude) {
-        return -1;
-    } else {
-        return 0;
-    }
+    return a.longitude < b.longitude ? -1 : a.longitude > b.longitude;
 }
 
 kdTree * 
@@ -48,20 +36,22 @@ addKdNode(kdNode **node, airport *airports, int start, int end, int dir)
     if (start <= end) {
         int size = end - start + 1;
         int median = start + floor(size/2);
+        int nodeIsLeaf = start == end;
         qsort(airports+start, size, sizeof(airport), dir ? cmpLongitude : cmpLatitude);
-        *node = genKdNode(airports, median, dir);
+        *node = genKdNode(airports, nodeIsLeaf ? median : -1, dir);
         addKdNode(&((*node)->left), airports, start, median-1, 1-dir);
-        addKdNode(&((*node)->right), airports, median+1, end, 1-dir);
+        addKdNode(&((*node)->right), airports, median, nodeIsLeaf ? -1 : end, 1-dir);
     }
 }
 
 kdNode *
-genKdNode(airport *airports, int median, int dir) {
+genKdNode(airport *airports, int median, int dir) 
+{
     kdNode *newNode = NEW_STRUCT(kdNode);
-    airport *airport = airports+median;
+    airport *airport = airports + median;
     newNode->pos = dir ? airport->longitude : airport->latitude;
     newNode->dir = dir;
-    newNode->airport = airport;
+    newNode->airport = median > -1 ? airport : NULL;
     newNode->left = NULL;
     newNode->right = NULL;
     return newNode;

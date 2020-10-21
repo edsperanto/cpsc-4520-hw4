@@ -36,10 +36,12 @@ int main() {
 
 void printKdTree(kdNode *node, int depth) {
     if (node != NULL) {
-        printf("Depth %d:\n", depth);
-        printf("    Sort direction: %s\n", node->dir ? "longitude" : "latitude");
-        printf("    Latitude: %f\n", node->airport->latitude);
-        printf("    Longitude: %f\n", node->airport->longitude);
+        if (node->airport != NULL) {
+            printf("Depth %d:\n", depth);
+            printf("    Sort direction: %s\n", node->dir ? "longitude" : "latitude");
+            printf("    Latitude: %f\n", node->airport->latitude);
+            printf("    Longitude: %f\n", node->airport->longitude);
+        }
         printKdTree(node->left, depth+1);
         printKdTree(node->right, depth+1);
     }
