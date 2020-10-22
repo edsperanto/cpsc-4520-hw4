@@ -18,11 +18,9 @@
 placesLLNode * testLL();
 
 // function declarations for processing RPC call
-airportsRet * findAirportsNearCoord(char *host, placesArg *coordinate);
+airportsRet * findAirportsNearCoord(CLIENT *clnt, placesArg *coordinate);
 CLIENT * connectToClient(char *host);
 void checkIfResultIsNull(airportsRet *result, CLIENT *clnt);
-airportsRet * createLocalCopy(airportsRet *result);
-airport * copyAirport(airport *curr);
 void disconnectFromClient(CLIENT *clnt, airportsRet *result);
 
 // places server main function
@@ -32,7 +30,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
 	static placesRet result;
 
     // initialize server function
-    xdr_free((xdrproc_t)xdr_placesRet, &result);
+    // xdr_free((xdrproc_t)xdr_placesRet, &result);
     result.err = 0;
 
     // load places file
@@ -69,7 +67,8 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     placesArg *coordinate = NEW_STRUCT(placesArg);
     coordinate->latitude = 6.28;
     coordinate->longitude = 0.5;
-    airportsRet *airportsResult = findAirportsNearCoord("localhost", coordinate);
+	CLIENT *clnt = connectToClient("localhost");
+    airportsRet *airportsResult = findAirportsNearCoord(clnt, coordinate);
 
     // print airports result
     airportsLLNode *curr = (airportsResult->airportsRet_u).airports;
@@ -82,7 +81,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     }
     printf("\n\n");
 
-    // TODO: dealloc linked list
+    disconnectFromClient(clnt, airportsResult);
 
     // return test result
     result.placesRet_u.airports = testLL();
@@ -107,14 +106,11 @@ testLL()
 }
 
 airportsRet *
-findAirportsNearCoord(char *host, placesArg *coordinate)
+findAirportsNearCoord(CLIENT *clnt, placesArg *coordinate)
 {
-	CLIENT *clnt = connectToClient(host);
 	airportsRet *result = airports_near_coord_1(coordinate, clnt);
     checkIfResultIsNull(result, clnt);
-    airportsRet *resultCpy = createLocalCopy(result);
-    disconnectFromClient(clnt, result);
-    return resultCpy;
+    return result;
 }
 
 CLIENT *
@@ -135,33 +131,6 @@ checkIfResultIsNull(airportsRet *result, CLIENT *clnt)
 	if (result == (airportsRet *) NULL) {
 		clnt_perror(clnt, "call failed");
 	}
-}
-
-airportsRet *
-createLocalCopy(airportsRet *result) 
-{
-    airportsRet *resultCpy = NEW_STRUCT(airportsRet);
-    resultCpy->err = result->err;
-    (resultCpy->airportsRet_u).airports = NEW_STRUCT(airportsLLNode);
-    airportsLLNode *curr = (result->airportsRet_u).airports;
-    airportsLLNode *cpy = (resultCpy->airportsRet_u).airports;
-    for (; curr != NULL; curr = curr->next, cpy = cpy->next) {
-        airport *newNode = copyAirport(curr->airport);
-        cpy->airport = newNode;
-        cpy->next = (curr->next == NULL) ? NULL : NEW_STRUCT(airportsLLNode);
-    }
-    return resultCpy;
-}
-
-airport *
-copyAirport(airport *curr) 
-{
-    airport *newNode = NEW_STRUCT(airport);
-    CPY_STRING(newNode->code, curr->code);
-    CPY_STRING(newNode->name, curr->name);
-    newNode->latitude = curr->latitude;
-    newNode->longitude = curr->longitude;
-    return newNode;
 }
 
 void
