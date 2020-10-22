@@ -1,14 +1,3 @@
-struct trie { 
-    struct trieNode *root; 
-};
-
-struct trieNode {
-    char letter;
-    struct trieNode *next;
-    struct trieNode *down;
-    struct location *data;
-};
-
 struct location {
     string fullName<>;
     string state<>;

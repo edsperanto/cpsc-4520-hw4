@@ -6,6 +6,7 @@
 
 #include "places.h"
 #include "airports.h"
+#include "./trie/trie.h"
 #include <limits.h>
 
 #define NEW_STRUCT(s) (s *)malloc(sizeof(s))

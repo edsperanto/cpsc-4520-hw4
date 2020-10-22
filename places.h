@@ -14,19 +14,6 @@ extern "C" {
 #endif
 
 
-struct trie {
-	struct trieNode *root;
-};
-typedef struct trie trie;
-
-struct trieNode {
-	char letter;
-	struct trieNode *next;
-	struct trieNode *down;
-	struct location *data;
-};
-typedef struct trieNode trieNode;
-
 struct location {
 	char *fullName;
 	char *state;
@@ -83,8 +70,6 @@ extern int places_prog_1_freeresult ();
 /* the xdr functions */
 
 #if defined(__STDC__) || defined(__cplusplus)
-extern  bool_t xdr_trie (XDR *, trie*);
-extern  bool_t xdr_trieNode (XDR *, trieNode*);
 extern  bool_t xdr_location (XDR *, location*);
 extern  bool_t xdr_clientArg (XDR *, clientArg*);
 extern  bool_t xdr_airportInfo (XDR *, airportInfo*);
@@ -92,8 +77,6 @@ extern  bool_t xdr_placesLLNode (XDR *, placesLLNode*);
 extern  bool_t xdr_placesRet (XDR *, placesRet*);
 
 #else /* K&R C */
-extern bool_t xdr_trie ();
-extern bool_t xdr_trieNode ();
 extern bool_t xdr_location ();
 extern bool_t xdr_clientArg ();
 extern bool_t xdr_airportInfo ();

@@ -6,32 +6,6 @@
 #include "places.h"
 
 bool_t
-xdr_trie (XDR *xdrs, trie *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_pointer (xdrs, (char **)&objp->root, sizeof (struct trieNode), (xdrproc_t) xdr_trieNode))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
-xdr_trieNode (XDR *xdrs, trieNode *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_char (xdrs, &objp->letter))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->next, sizeof (trieNode), (xdrproc_t) xdr_trieNode))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->down, sizeof (trieNode), (xdrproc_t) xdr_trieNode))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->data, sizeof (struct location), (xdrproc_t) xdr_location))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
 xdr_location (XDR *xdrs, location *objp)
 {
 	register int32_t *buf;
