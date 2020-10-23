@@ -88,7 +88,8 @@ void trie_add_entry(struct trie *const trie, const char *str, const void *const 
     node = trie->root;
   }
   else if (node == NULL) {
-    trie->root->next = trie_make_node(*str++);
+    struct trie_node *root_level_tail = trie_level_get_tail(trie->root);
+    root_level_tail->next = trie_make_node(*str++);
     node = trie->root->next;
   }
   else if (node->down != NULL) {
