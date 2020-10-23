@@ -7,7 +7,6 @@
 #include "places.h"
 #include "airports.h"
 #include "./trie/trie.h"
-#include <limits.h>
 
 #define NEW_STRUCT(s) (s *)malloc(sizeof(s))
 #define NEW_STRING(s) (char *)malloc(strlen(s)+1)
@@ -22,6 +21,25 @@ airportsRet * findAirportsNearCoord(CLIENT *clnt, placesArg *coordinate);
 CLIENT * connectToClient(char *host);
 void checkIfResultIsNull(airportsRet *result, CLIENT *clnt);
 void disconnectFromClient(CLIENT *clnt, airportsRet *result);
+
+void print_paths(const struct trie_node *const node, int pos) {
+  static char prefix[256];
+  char c = node->letter;
+  if (node->down != NULL) {
+    prefix[pos] = c;
+    printf("%c", c);
+    print_paths(node->down, pos + 1);
+  }
+  else {
+    printf("%c\n", c);
+  }
+  if (node->next != NULL) {
+    for (int i = 0; i < pos; i++) {
+      printf("%c", prefix[i]);
+    }
+    print_paths(node->next, pos);
+  }
+}
 
 // places server main function
 placesRet *
@@ -41,11 +59,10 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
         exit(1);
     }
 
+    struct trie trie = { .root = NULL };
     // read lines
-    char line[165], state[3], city[65], latitude[11], longitude[12];
-    for (int i = 0; i < 5; i++) {
-        printf("ROUND %d:\n", i);
-        fgets(line, INT_MAX, fp);
+    char line[256], state[3], city[65], latitude[11], longitude[12];
+    while (fgets(line, sizeof(line), fp) != NULL) {
         SUBSTR(line, state, 1, 2);
         SUBSTR(line, city, 10, 73);
         SUBSTR(line, latitude, 144, 153);
@@ -54,8 +71,25 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
         printf("    City: %s\n", city);
         printf("    Latitude: %s\n", latitude);
         printf("    Longitude: %s\n", longitude);
+        trie_add_entry(&trie, city, NULL);
     }
 
+    // demonstrates that all (or at least a lot of..) entries are successfully added to trie
+    print_paths(trie.root, 0);
+    
+    // demonstration of how to search the trie
+    struct trie_search_result search = trie_search(&trie, "Longview city");
+    if (*(search.rest) == '\0') {
+        printf("Longview city found\n");
+    } else {
+        printf("Longview city not found\n");
+    }
+    search = trie_search(&trie, "Afton city");
+    if (*(search.rest) == '\0') {
+        printf("Afton city found\n");
+    } else {
+        printf("Afton City not found\n");
+    }
     // close file
     fclose(fp);
 
