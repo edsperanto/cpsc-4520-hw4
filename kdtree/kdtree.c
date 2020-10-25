@@ -5,6 +5,7 @@
 
 #define LATITUDE 0
 #define LONGITUDE 1
+#define pi 3.14159265358979323846
 #define NEW_STRUCT(s) (s *)malloc(sizeof(s))
 #define NEW_STRING(s) (char *)malloc(strlen(s)+1)
 #define CPY_STRING(dst, src) dst = NEW_STRING(src); strcpy(dst, src)
@@ -51,9 +52,8 @@ genKdNode(airport *airports, kdNode *parent, int median, int dir)
 {
     kdNode *newNode = NEW_STRUCT(kdNode);
     airport *airport = airports + median;
-    newNode->x = airport->longitude;
-    newNode->y = airport->latitude;
     newNode->dir = dir;
+	newNode->pos = dir ? airport->longitude : airport->latitude;
     newNode->airport = airport;
     newNode->parent = parent;
     newNode->left = NULL;
@@ -61,65 +61,49 @@ genKdNode(airport *airports, kdNode *parent, int median, int dir)
     return newNode;
 }
 
-struct kdNode *
-nearestNeighbor(struct kdNode *node, double x, double y) 
+void
+nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_dist) 
 {
-    struct kdNode *approx = searchApprox(node, x, y),
-                  *nearest;
-    searchAround(approx, &nearest, x, y, DBL_MAX);
-    return nearest;
+	if (node == NULL) return ;
+    double dist = distance(lat, lon, node->airport->latitude, node->airport->longitude, 'M'); // distance from node to search point
+	double p_dir = (node->dir ? lon : lat) - node->pos; // perpendicular direction
+    double p_dist = distance(lat, lon, node->dir ? lat : node->pos, node->dir ? node->pos : lon, 'M'); // perpendicular distance
+	
+    if (!*nn || dist < *nn_dist) {
+        *nn_dist = dist;
+        *nn = node;
+    }
+
+    if (*nn_dist == 0) return ;
+    nearestNeighbor(p_dir < 0 ? node->left : node->right, lat, lon, nn, nn_dist);
+    if (p_dist > *nn_dist) return ;
+    nearestNeighbor(p_dir < 0 ? node->right : node->left, lat, lon, nn, nn_dist);
 }
 
-struct kdNode *
-searchApprox(struct kdNode *node, double x, double y) 
+double
+distance(double lat1, double lon1, double lat2, double lon2, char unit)
 {
-    if (node->dir == LATITUDE) {
-        if (node->left != NULL && y < node->y) {
-            return searchApprox(node->left, x, y);
-        } else if (node->right != NULL && y >= node->y) {
-            return searchApprox(node->right, x, y);
-        }
+    double theta, dist;
+    theta = lon1 - lon2;
+    dist = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) + cos(deg2rad(lat1)) *
+           cos(deg2rad(lat2)) * cos(deg2rad(theta));
+    dist = rad2deg(acos(dist)) * 60 * 1.1515;
+    switch (unit) {
+        case 'M': break;
+        case 'K': dist = dist * 1.609344; break;
+        case 'N': dist = dist * 0.8684; break;
     }
-    if (node->dir == LONGITUDE) {
-        if (node->left != NULL && x < node->x) {
-            return searchApprox(node->left, x, y);
-        } else if (node->right != NULL && x >= node->x) {
-            return searchApprox(node->right, x, y);
-        }
-    }
-    return node;
+    return dist;
 }
 
-void 
-searchAround(struct kdNode *node, struct kdNode **best, double x, double y, double dist) 
+double 
+deg2rad(double deg) 
 {
-    double curr_min = node->dir == LATITUDE ? fabs(node->y - y) : fabs(node->x - x);
-    double parent_min = DBL_MAX;
-    double left_min = DBL_MAX;
-    double right_min = DBL_MAX;
-    if (node->parent != NULL) {
-        parent_min = node->parent->dir == LATITUDE ? fabs(node->parent->y - y) : fabs(node->parent->x - x);
-    }
-    if (node->left != NULL) {
-        left_min = node->left->dir == LATITUDE ? fabs(node->left->y - y) : fabs(node->left->x - x);
-    }
-    if (node->right != NULL) {
-        right_min = node->right->dir == LATITUDE ? fabs(node->right->y - y) : fabs(node->right->x - x);
-    }
-    
-    double curr_dist = sqrt(pow(node->x - x, 2) + pow(node->y - y, 2));
-    if (curr_dist < dist) {
-        dist = curr_dist;
-        *best = node;
-    }
-    
-    if (node->left != NULL && left_min < curr_min) {
-        searchAround(node->left, best, x, y, dist);
-    }
-    if (node->right != NULL && right_min < curr_min) {
-        searchAround(node->right, best, x, y, dist);
-    }
-    if (node->parent != NULL && parent_min < curr_min) {
-        searchAround(node->parent, best, x, y, dist);
-    }
+    return (deg * pi / 180);
+}
+
+double 
+rad2deg(double rad) 
+{
+    return (rad * 180 / pi);
 }

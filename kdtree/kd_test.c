@@ -32,7 +32,9 @@ int main() {
     printf("\n");
 
     printf("Finding nearest...\n");
-    kdNode *nearest = nearestNeighbor(kd->root, 109, -3.62);
+    kdNode *nearest = NULL;
+    double *nearest_dist = (double *)malloc(sizeof(double));
+    nearestNeighbor(kd->root, 16, 158, &nearest, nearest_dist);
     printf("    Latitude: %f\n", nearest->airport->latitude);
     printf("    Longitude: %f\n", nearest->airport->longitude);
     
