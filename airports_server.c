@@ -64,7 +64,7 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     // check if airports loaded in k-d tree
     // check if search works
     kdNode *nearest = NULL;
-    double *nearest_dist;
+    double *nearest_dist = NULL;
     nearestNeighbor(kd->root, argp->latitude, argp->longitude, &nearest, nearest_dist);
 
     // return test payload

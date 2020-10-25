@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "places.h"
 #include "airports.h"
@@ -130,12 +131,29 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     printf("city: %s   state: %s\n", argp->city, argp->state);
     
     struct trie_search_result search = trie_search(&trie, argp->city);
-    struct location *query = (search.last)->data;
+    struct location *query = search.last->data;
+
+    // match the closest prefix
+    while (query == NULL && search.last->down != NULL) {
+        search.last = search.last->down;
+        query = search.last->data;
+    }
+    
+    if (query == NULL) {
+        result.err = 1;
+        return &result;
+    }
+
+    printf("query state: %s\n", query->state);
+    printf("query city: %s\n", query->city);
+    printf("query longitude: %f\n", query->longitude);
+    printf("query longitude: %f\n", query->latitude);
 
     // test call airports server
     placesArg *coordinate = NEW_STRUCT(placesArg);
-    coordinate->latitude = 1.0;
-    coordinate->longitude = 0.5;
+    coordinate->latitude = query->latitude;
+    coordinate->longitude = query->longitude;
+
 	CLIENT *clnt = connectToClient("localhost");
     airportsRet *airportsResult = findAirportsNearCoord(clnt, coordinate);
 
@@ -153,6 +171,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     disconnectFromClient(clnt, airportsResult);
 
     // return test result
+    result.placesRet_u.results.location = *query;
     result.placesRet_u.results.airports = testLL();
 	return &result;
 }
