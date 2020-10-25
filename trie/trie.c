@@ -53,7 +53,7 @@ struct trie_search_result trie_search(const struct trie *const trie, const char 
       break;
     }
   }
-  return (struct trie_search_result){(char *)str, (struct trie_node *)prev};
+  return (struct trie_search_result){(char *)str, (struct trie_node *) curr != NULL ? curr : prev};
 }
 
 /* maybe recursive version
