@@ -1,2 +1,2 @@
 echo "Compiling..."
-gcc -g -I /usr/include/tirpc -o kd_test kd_test.c kdtree.c
+gcc -g -lm -I /usr/include/tirpc -o kd_test kd_test.c kdtree.c

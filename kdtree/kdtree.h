@@ -32,8 +32,8 @@ int cmpLatitude (const void *a_ptr, const void *b_ptr);
 int cmpLongitude (const void *a_ptr, const void *b_ptr);
 
 kdTree * generateKdTree(airport *airports, int size);
-void addKdNode(kdNode **node, airport *airports, int start, int end, int dir);
-kdNode * genKdNode(airport *airports, int median, int dir);
+void addKdNode(kdNode **node, kdNode *parent, airport *airports, int start, int end, int dir);
+kdNode * genKdNode(airport *airports, kdNode *parent, int median, int dir);
 void searchAround(struct kdNode *node, struct kdNode **best, double x, double y, double dist);
 struct kdNode *searchApprox(struct kdNode *node, double x, double y);
 struct kdNode *nearestNeighbor(struct kdNode *node, double x, double y);

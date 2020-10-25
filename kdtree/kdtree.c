@@ -29,66 +29,70 @@ kdTree *
 generateKdTree(airport *airports, int size) 
 {
     kdTree *kd = NEW_STRUCT(kdTree);
-    addKdNode(&(kd->root), airports, 0, size-1, LATITUDE);
+    addKdNode(&(kd->root), NULL, airports, 0, size-1, LATITUDE);
     return kd;
 }
 
 void
-addKdNode(kdNode **node, airport *airports, int start, int end, int dir)
+addKdNode(kdNode **node, kdNode *parent, airport *airports, int start, int end, int dir)
 {
     if (start <= end) {
         int size = end - start + 1;
         int median = start + floor(size/2);
-        int nodeIsLeaf = start == end;
         qsort(airports+start, size, sizeof(airport), dir ? cmpLongitude : cmpLatitude);
-        *node = genKdNode(airports, nodeIsLeaf ? median : -1, dir);
-        addKdNode(&((*node)->left), airports, start, median-1, 1-dir);
-        addKdNode(&((*node)->right), airports, median, nodeIsLeaf ? -1 : end, 1-dir);
+        *node = genKdNode(airports, parent, median, dir);
+        addKdNode(&((*node)->left), *node, airports, start, median-1, 1-dir);
+        addKdNode(&((*node)->right), *node, airports, median+1, end, 1-dir);
     }
 }
 
 kdNode *
-genKdNode(airport *airports, int median, int dir) 
+genKdNode(airport *airports, kdNode *parent, int median, int dir) 
 {
     kdNode *newNode = NEW_STRUCT(kdNode);
     airport *airport = airports + median;
     newNode->x = airport->longitude;
     newNode->y = airport->latitude;
     newNode->dir = dir;
-    newNode->airport = median > -1 ? airport : NULL;
+    newNode->airport = airport;
+    newNode->parent = parent;
     newNode->left = NULL;
     newNode->right = NULL;
     return newNode;
 }
 
-struct kdNode *nearestNeighbor(struct kdNode *node, double x, double y) {
+struct kdNode *
+nearestNeighbor(struct kdNode *node, double x, double y) 
+{
     struct kdNode *approx = searchApprox(node, x, y),
                   *nearest;
     searchAround(approx, &nearest, x, y, DBL_MAX);
     return nearest;
 }
 
-struct kdNode *searchApprox(struct kdNode *node, double x, double y) {
-    if (node->left == NULL && node->right == NULL) {
-        return node;
-    }
+struct kdNode *
+searchApprox(struct kdNode *node, double x, double y) 
+{
     if (node->dir == LATITUDE) {
-        if (node->left != NULL && node->y <= y) {
+        if (node->left != NULL && y < node->y) {
             return searchApprox(node->left, x, y);
-        } else if (node->right != NULL && node->y > y) {
+        } else if (node->right != NULL && y >= node->y) {
             return searchApprox(node->right, x, y);
         }
     }
     if (node->dir == LONGITUDE) {
-        if (node->left != NULL && node->x <= x) {
+        if (node->left != NULL && x < node->x) {
             return searchApprox(node->left, x, y);
-        } else if (node->right != NULL && node->x > x) {
+        } else if (node->right != NULL && x >= node->x) {
             return searchApprox(node->right, x, y);
         }
     }
+    return node;
 }
 
-void searchAround(struct kdNode *node, struct kdNode **best, double x, double y, double dist) {
+void 
+searchAround(struct kdNode *node, struct kdNode **best, double x, double y, double dist) 
+{
     double curr_min = node->dir == LATITUDE ? fabs(node->y - y) : fabs(node->x - x);
     double parent_min = DBL_MAX;
     double left_min = DBL_MAX;
@@ -109,13 +113,13 @@ void searchAround(struct kdNode *node, struct kdNode **best, double x, double y,
         *best = node;
     }
     
-    if (left_min < curr_min) {
+    if (node->left != NULL && left_min < curr_min) {
         searchAround(node->left, best, x, y, dist);
     }
-    if (right_min < curr_min) {
+    if (node->right != NULL && right_min < curr_min) {
         searchAround(node->right, best, x, y, dist);
     }
-    if (parent_min < curr_min) {
+    if (node->parent != NULL && parent_min < curr_min) {
         searchAround(node->parent, best, x, y, dist);
     }
 }
