@@ -88,7 +88,7 @@ void read_file(struct location *locs, struct trie *trie) {
         // printf("    Latitude: %s|\n", latitude);
         // printf("    Longitude: %s|\n", longitude);
         locs[i] = (struct location) {
-            .fullName = strdup(city),
+            .city = strdup(city),
             .state = strdup(state),
             .latitude = atof(latitude),
             .longitude = atof(longitude),
@@ -130,7 +130,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     printf("city: %s   state: %s\n", argp->city, argp->state);
     
     struct trie_search_result search = trie_search(&trie, argp->city);
-    struct location query = search.last->data;
+    struct location *query = (search.last)->data;
 
     // test call airports server
     placesArg *coordinate = NEW_STRUCT(placesArg);
