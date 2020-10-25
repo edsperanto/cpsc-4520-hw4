@@ -30,6 +30,13 @@ int main() {
     printf("Printing KD tree...\n");
     printKdTree(kd->root, 1);
     printf("\n");
+
+    printf("Finding nearest...\n");
+    kdNode *nearest = NULL;
+    double *nearest_dist = (double *)malloc(sizeof(double));
+    nearestNeighbor(kd->root, 16, 158, &nearest, nearest_dist);
+    printf("    Latitude: %f\n", nearest->airport->latitude);
+    printf("    Longitude: %f\n", nearest->airport->longitude);
     
     return 0;
 }

@@ -1,10 +1,3 @@
-# Parameters
-
-CLIENT = client
-PLACES = places
-AIRPORTS = airports
-
-
 # Places server parameters
 
 PLACES_TARGETS_CLNT.c = places_clnt.c places_client.c places_xdr.c 
@@ -21,13 +14,30 @@ AIRPORTS_TARGETS_SVC.c = airports_svc.c airports_server.c airports_xdr.c
 AIRPORTS_OBJECTS_CLNT = $(AIRPORTS_TARGETS_CLNT.c:%.c=%.o)
 AIRPORTS_OBJECTS_SVC = $(AIRPORTS_TARGETS_SVC.c:%.c=%.o)
 
-# trie
+# Trie parameters
 
 CFLAGS += -I ./trie
 TRIE_TARGETS = ./trie/trie.c
 TRIE_OBJECTS = $(TRIE_TARGETS:%.c=%.o)
-# $(info TRIE_TARGETS are $(TRIE_TARGETS))
-# $(info TRIE_OBJECTS are $(TRIE_OBJECTS))
+
+
+# K-D tree parameters
+
+CFLAGS += -lm -I ./kdtree
+KD_TARGETS = ./kdtree/kdtree.c
+KD_OBJECTS = $(KD_TARGETS:%.c=%.o)
+
+
+# Program parameters
+
+CLIENT = client
+PLACES = places
+AIRPORTS = airports
+
+CLIENT_OBJECTS = $(PLACES_OBJECTS_CLNT)
+PLACES_OBJECTS = $(PLACES_OBJECTS_SVC) $(AIRPORTS_OBJECTS_CLNT) $(TRIE_OBJECTS)
+AIRPORTS_OBJECTS = $(AIRPORTS_OBJECTS_SVC) $(KD_OBJECTS)
+
 
 # list
 
@@ -41,8 +51,8 @@ LIST_OBJECTS = $(LIST_TARGETS:%.c=%.o)
 # Compiler flags
 
 CFLAGS += -g -I /usr/include/tirpc
-# LDLIBS += -ltirpc
-LDLIBS += -lnsl
+LDLIBS += -ltirpc
+# LDLIBS += -lnsl
 RPCGENFLAGS = 
 
 
@@ -52,6 +62,7 @@ all : $(CLIENT) $(PLACES) $(AIRPORTS)
 
 $(LIST_OBJECTS) : $(LIST_TARGETS) $(LIST_TARGETS:%.c=%.h)
 $(TRIE_OBJECTS) : $(TRIE_TARGETS) $(TRIE_TARGETS:%.c=%.h)
+$(KD_OBJECTS) : $(KD_TARGETS) $(KD_TARGETS:%.c=%.h)
 
 $(PLACES_OBJECTS_CLNT) : $(PLACES_TARGETS_CLNT.c) 
 $(PLACES_OBJECTS_SVC) : $(PLACES_TARGETS_SVC.c)
@@ -61,7 +72,7 @@ $(AIRPORTS_OBJECTS_SVC) : $(AIRPORTS_TARGETS_SVC.c)
 
 CLIENT_OBJECTS = $(PLACES_OBJECTS_CLNT)
 PLACES_OBJECTS = $(PLACES_OBJECTS_SVC) $(AIRPORTS_OBJECTS_CLNT) $(TRIE_OBJECTS)
-AIRPORTS_OBJECTS = $(AIRPORTS_OBJECTS_SVC) $(LIST_OBJECTS)
+AIRPORTS_OBJECTS = $(AIRPORTS_OBJECTS_SVC) $(KD_OBJECTS) $(LIST_OBJECTS)
 
 $(CLIENT) : $(CLIENT_OBJECTS) 
 	$(LINK.c) -o $(CLIENT) $(CLIENT_OBJECTS) $(LDLIBS) 
@@ -73,4 +84,4 @@ $(AIRPORTS) : $(AIRPORTS_OBJECTS)
 	$(LINK.c) -o $(AIRPORTS) $(AIRPORTS_OBJECTS) $(LDLIBS) 
 
 clean:
-	$(RM) core $(CLIENT_OBJECTS) $(PLACES_OBJECTS) $(AIRPORTS_OBJECTS) $(CLIENT) $(PLACES) $(AIRPORTS)
+	$(RM) core $(CLIENT_OBJECTS) $(PLACES_OBJECTS) $(AIRPORTS_OBJECTS) $(TRIE_OBJECTS) $(KD_OBJECTS) $(LIST_OBJECTS) $(CLIENT) $(PLACES) $(AIRPORTS)

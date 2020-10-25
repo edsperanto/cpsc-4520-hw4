@@ -5,12 +5,28 @@
  */
 
 #include "airports.h"
+#include "./kdtree/kdtree.h"
+
+#define LINE_SIZE 64
+#define NUM_ENTRIES 1072
+#define NEW_STRUCT(s) (s *)malloc(sizeof(s))
+#define NEW_STRING(s) (char *)malloc(strlen(s)+1)
+#define CPY_STRING(dst, src) dst = NEW_STRING(src); strcpy(dst, src)
+#define IS_SPACE(ch) (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+#define IS_ENDING(ch) (ch == '\n' || ch == '\r' || ch == '\0')
 
 airportsLLNode * testLL();
+
+int isEmpty(const char *str);
+airport * generateAirport(char *line);
+void readAirportColumn(int col, char *line, char *cpy);
+int skipToStartOfColumn(int col, char *line);
 
 airportsRet *
 airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 {
+    static airport *airports[NUM_ENTRIES];
+    static kdTree *kd = NULL;
 	static airportsRet result;
 
     // initialize server function
@@ -21,6 +37,38 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     // print payload from client
     printf("placesArg\n");
     printf("latitude: %0.2f   longitude: %0.2f\n", argp->latitude, argp->longitude);
+
+    // generate k-d tree from airports file
+    if (kd == NULL) {
+
+        // load file
+        char *airportsFile = "data/airport-locations.txt";
+        FILE *fp = fopen(airportsFile, "r");
+        if (fp == NULL) {
+            printf("Could not open file %s\n", airportsFile);
+            exit(1);
+        }
+
+        // read file
+        char line[LINE_SIZE];
+        fgets(line, sizeof(line), fp); // ignore first line
+        for (int i = 0; fgets(line, sizeof(line), fp) != NULL; ) {
+            if (!isEmpty(line)) {
+                airports[i++] = generateAirport(line);
+            }
+        }
+
+        // close file
+        fclose(fp);
+
+    }
+
+    // check if airports loaded
+    airport *a;
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+        a = airports[i];
+        printf("%s %f %f %s\n", a->code, a->latitude, a->longitude, a->name);
+    }
 
     // return test payload
     result.airportsRet_u.airports = testLL();
@@ -45,4 +93,55 @@ testLL()
     return LL;
 }
 
+int
+isEmpty(const char *str)
+{
+    char ch;
+    for (ch = *str; IS_SPACE(ch); ch = *(str++)) ;
+    return ch == '\0';
+}
 
+airport *
+generateAirport(char *line)
+{
+    char code[4], lat[8], lon[8], city[50];
+    airport *newAirport = NEW_STRUCT(airport);
+    readAirportColumn(1, line, code);
+    readAirportColumn(2, line, lat);
+    readAirportColumn(3, line, lon);
+    readAirportColumn(4, line, city);
+    CPY_STRING(newAirport->code, code);
+    CPY_STRING(newAirport->name, city);
+    newAirport->latitude = atof(lat);
+    newAirport->longitude = atof(lon);
+    newAirport->distance = 0;
+    return newAirport;
+}
+
+void
+readAirportColumn(int col, char *line, char *cpy)
+{
+    int i = 0, j = skipToStartOfColumn(col, line);
+    switch (col) {
+        case 1: for (j = 1; j < 4; i++, j++) cpy[i] = line[j]; break;
+        case 2: case 3: while (!IS_SPACE(line[j])) cpy[i++] = line[j++]; break;
+        case 4: while (!IS_ENDING(line[j])) cpy[i++] = line[j++]; break;
+    }
+    cpy[i] = '\0';
+}
+
+int
+skipToStartOfColumn(int col, char *line)
+{
+    int j = 0, inCol = 1;
+    for (int s = 1; s < col; j++) {
+        if (inCol && IS_SPACE(line[j])) {
+            inCol = 0;
+        }
+        if (!inCol && !IS_SPACE(line[j+1])) {
+            inCol = 1;
+            s++;
+        }
+    }
+    return j;
+}

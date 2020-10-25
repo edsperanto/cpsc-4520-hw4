@@ -12,9 +12,10 @@ struct kdTree {
 typedef struct kdTree kdTree;
 
 struct kdNode {
-    double pos;
     int dir;
-    struct airport *airport;
+    double pos;
+    airport *airport;
+    struct kdNode *parent;
     struct kdNode *left;
     struct kdNode *right;
 };
@@ -30,7 +31,12 @@ int cmpLatitude (const void *a_ptr, const void *b_ptr);
 int cmpLongitude (const void *a_ptr, const void *b_ptr);
 
 kdTree * generateKdTree(airport *airports, int size);
-void addKdNode(kdNode **node, airport *airports, int start, int end, int dir);
-kdNode * genKdNode(airport *airports, int median, int dir);
+void addKdNode(kdNode **node, kdNode *parent, airport *airports, int start, int end, int dir);
+kdNode * genKdNode(airport *airports, kdNode *parent, int median, int dir);
+void nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_dist);
+
+double distance(double lat1, double lon1, double lat2, double lon2, char unit);
+double deg2rad(double deg);
+double rad2deg(double rad);
 
 #endif
