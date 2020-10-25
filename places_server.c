@@ -13,6 +13,7 @@
 #include "airports.h"
 #include "./trie/trie.h"
 
+#define K 5
 #define NEW_STRUCT(s) (s *)malloc(sizeof(s))
 #define NEW_STRING(s) (char *)malloc(strlen(s)+1)
 #define CPY_STRING(dst, src) dst = NEW_STRING(src); strcpy(dst, src)
@@ -158,21 +159,24 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     airportsRet *airportsResult = findAirportsNearCoord(clnt, coordinate);
 
     // print airports result
-    airportsLLNode *curr = (airportsResult->airportsRet_u).airports;
-    while (curr != NULL) {
-        printf("Code: %s  ", curr->airport->code);
-        printf("Name: %s  ", curr->airport->name);
-        printf("Latitude: %0.2f  ", curr->airport->latitude);
-        printf("Longitude: %0.2f\n", curr->airport->longitude);
-        curr = curr->next;
-    }
     printf("\n\n");
 
     disconnectFromClient(clnt, airportsResult);
 
-    // return test result
+    // return test payload
     result.placesRet_u.results.location = *query;
-    result.placesRet_u.results.airports = testLL();
+    result.placesRet_u.results.airports = (placesLLNode *)malloc(sizeof(placesLLNode));
+    placesLLNode *curr = result.placesRet_u.results.airports;
+    while (curr != NULL) {
+        airportInfo *newNode = (airportInfo *)malloc(sizeof(airportInfo));
+        newNode->code = curr->airport->code;
+        newNode->name = curr->airport->name;
+        newNode->latitude = curr->airport->latitude;
+        newNode->longitude = curr->airport->longitude;
+        curr->airport = newNode;
+        curr = curr->next;
+    }
+
 	return &result;
 }
 

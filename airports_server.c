@@ -7,6 +7,7 @@
 #include "airports.h"
 #include "./kdtree/kdtree.h"
 
+#define K 5
 #define LINE_SIZE 64
 #define NUM_ENTRIES 1072
 #define NEW_STRUCT(s) (s *)malloc(sizeof(s))
@@ -63,31 +64,25 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 
     // check if airports loaded in k-d tree
     // check if search works
-    kdNode *nearest = NULL;
-    double *nearest_dist = NULL;
-    nearestNeighbor(kd->root, argp->latitude, argp->longitude, &nearest, nearest_dist);
+    kdNode *nearest[K];
+    double *nearest_dist[K];
+    kNearestNeighbor(kd->root, K, argp->latitude, argp->longitude, nearest, nearest_dist);
 
     // return test payload
-    result.airportsRet_u.airports = testLL();
-	return &result;
-}
-
-airportsLLNode *
-testLL() 
-{
-    airportsLLNode *LL = (airportsLLNode *)malloc(sizeof(airportsLLNode));
-    airportsLLNode *curr = LL;
-    for (int i = 0; i < 5; i++) {
+    result.airportsRet_u.airports = (airportsLLNode *)malloc(sizeof(airportsLLNode));
+    airportsLLNode *curr = result.airportsRet_u.airports;
+    for (int i = 0; i < K; i++) {
         airport *newNode = (airport *)malloc(sizeof(airport));
-        newNode->code = "code";
-        newNode->name = "name";
-        newNode->latitude = 3.14;
-        newNode->longitude = 2.718;
+        newNode->code = nearest[i]->airport->code;
+        newNode->name = nearest[i]->airport->name;
+        newNode->latitude = nearest[i]->airport->latitude;
+        newNode->longitude = nearest[i]->airport->longitude;
         curr->airport = newNode;
-        curr->next = (i == 4) ? NULL : (airportsLLNode *)malloc(sizeof(airportsLLNode));
+        curr->next = (i == K-1) ? NULL : (airportsLLNode *)malloc(sizeof(airportsLLNode));
         curr = curr->next;
     }
-    return LL;
+
+	return &result;
 }
 
 int

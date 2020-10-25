@@ -13,6 +13,7 @@ typedef struct kdTree kdTree;
 
 struct kdNode {
     int dir;
+    int visited;
     double pos;
     airport *airport;
     struct kdNode *parent;
@@ -34,6 +35,7 @@ kdTree * generateKdTree(airport *airports, int size);
 void addKdNode(kdNode **node, kdNode *parent, airport *airports, int start, int end, int dir);
 kdNode * genKdNode(airport *airports, kdNode *parent, int median, int dir);
 void nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_dist);
+void kNearestNeighbor(kdNode *node, int k, double lat, double lon, kdNode *nn[], double *nn_dist[]);
 void printKdTree(kdNode *node, int depth);
 
 double distance(double lat1, double lon1, double lat2, double lon2, char unit);

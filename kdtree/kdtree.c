@@ -53,6 +53,7 @@ genKdNode(airport *airports, kdNode *parent, int median, int dir)
     kdNode *newNode = NEW_STRUCT(kdNode);
     airport *airport = airports + median;
     newNode->dir = dir;
+    newNode->visited = 0;
 	newNode->pos = dir ? airport->longitude : airport->latitude;
     newNode->airport = airport;
     newNode->parent = parent;
@@ -69,7 +70,7 @@ nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_di
 	double p_dir = (node->dir ? lon : lat) - node->pos; // perpendicular direction
     double p_dist = distance(lat, lon, node->dir ? lat : node->pos, node->dir ? node->pos : lon, 'M'); // perpendicular distance
 	
-    if (!*nn || dist < *nn_dist) {
+    if ((!*nn || dist < *nn_dist) && node->visited == 0) {
         *nn_dist = dist;
         *nn = node;
     }
@@ -78,6 +79,23 @@ nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_di
     nearestNeighbor(p_dir < 0 ? node->left : node->right, lat, lon, nn, nn_dist);
     if (p_dist > *nn_dist) return ;
     nearestNeighbor(p_dir < 0 ? node->right : node->left, lat, lon, nn, nn_dist);
+}
+
+void
+kNearestNeighbor(kdNode *node, int k, double lat, double lon, kdNode *nn[], double *nn_dist[]) 
+{
+    kdNode *nearest = NULL;
+    double *nearest_dist;
+    for (int i = 0; i < k; i++) {
+        nearest_dist = (double *)malloc(sizeof(double));
+        nearestNeighbor(node, 16, 158, &nearest, nearest_dist);
+        nearest->visited = 1;
+        nn[i] = nearest;
+        nn_dist[i] = nearest_dist;
+    }
+    for (int i = 0; i < k; i++) {
+        nn[i]->visited = 0;
+    }
 }
 
 void 
