@@ -15,7 +15,7 @@ extern "C" {
 
 
 struct location {
-	char *fullName;
+	char *city;
 	char *state;
 	double latitude;
 	double longitude;
@@ -43,10 +43,16 @@ struct placesLLNode {
 };
 typedef struct placesLLNode placesLLNode;
 
+struct placesResults {
+	struct location location;
+	struct placesLLNode *airports;
+};
+typedef struct placesResults placesResults;
+
 struct placesRet {
 	int err;
 	union {
-		placesLLNode *airports;
+		placesResults results;
 	} placesRet_u;
 };
 typedef struct placesRet placesRet;
@@ -74,6 +80,7 @@ extern  bool_t xdr_location (XDR *, location*);
 extern  bool_t xdr_clientArg (XDR *, clientArg*);
 extern  bool_t xdr_airportInfo (XDR *, airportInfo*);
 extern  bool_t xdr_placesLLNode (XDR *, placesLLNode*);
+extern  bool_t xdr_placesResults (XDR *, placesResults*);
 extern  bool_t xdr_placesRet (XDR *, placesRet*);
 
 #else /* K&R C */
@@ -81,6 +88,7 @@ extern bool_t xdr_location ();
 extern bool_t xdr_clientArg ();
 extern bool_t xdr_airportInfo ();
 extern bool_t xdr_placesLLNode ();
+extern bool_t xdr_placesResults ();
 extern bool_t xdr_placesRet ();
 
 #endif /* K&R C */

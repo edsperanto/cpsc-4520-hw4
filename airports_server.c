@@ -34,10 +34,6 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     result.err = 0;
     result.airportsRet_u.airports = NULL;
 
-    // print payload from client
-    printf("placesArg\n");
-    printf("latitude: %0.2f   longitude: %0.2f\n", argp->latitude, argp->longitude);
-
     // generate k-d tree from airports file
     if (airports == NULL) {
 
@@ -66,7 +62,10 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     }
 
     // check if airports loaded in k-d tree
-    printKdTree(kd->root, 1);
+    // check if search works
+    kdNode *nearest = NULL;
+    double *nearest_dist;
+    nearestNeighbor(kd->root, argp->latitude, argp->longitude, &nearest, nearest_dist);
 
     // return test payload
     result.airportsRet_u.airports = testLL();
