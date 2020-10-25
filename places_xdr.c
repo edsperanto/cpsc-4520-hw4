@@ -10,7 +10,7 @@ xdr_location (XDR *xdrs, location *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_string (xdrs, &objp->fullName, ~0))
+	 if (!xdr_string (xdrs, &objp->city, ~0))
 		 return FALSE;
 	 if (!xdr_string (xdrs, &objp->state, ~0))
 		 return FALSE;
@@ -64,6 +64,18 @@ xdr_placesLLNode (XDR *xdrs, placesLLNode *objp)
 }
 
 bool_t
+xdr_placesResults (XDR *xdrs, placesResults *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_location (xdrs, &objp->location))
+		 return FALSE;
+	 if (!xdr_pointer (xdrs, (char **)&objp->airports, sizeof (placesLLNode), (xdrproc_t) xdr_placesLLNode))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
 xdr_placesRet (XDR *xdrs, placesRet *objp)
 {
 	register int32_t *buf;
@@ -72,7 +84,7 @@ xdr_placesRet (XDR *xdrs, placesRet *objp)
 		 return FALSE;
 	switch (objp->err) {
 	case 0:
-		 if (!xdr_pointer (xdrs, (char **)&objp->placesRet_u.airports, sizeof (placesLLNode), (xdrproc_t) xdr_placesLLNode))
+		 if (!xdr_placesResults (xdrs, &objp->placesRet_u.results))
 			 return FALSE;
 		break;
 	default:

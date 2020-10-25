@@ -153,7 +153,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     disconnectFromClient(clnt, airportsResult);
 
     // return test result
-    result.placesRet_u.airports = testLL();
+    result.placesRet_u.results.airports = testLL();
 	return &result;
 }
 

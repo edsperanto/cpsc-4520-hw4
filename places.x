@@ -1,5 +1,5 @@
 struct location {
-    string fullName<>;
+    string city<>;
     string state<>;
     double latitude;
     double longitude;
@@ -23,9 +23,14 @@ struct placesLLNode {
     struct placesLLNode *next;
 };
 
+struct placesResults {
+    struct location location;
+    struct placesLLNode *airports;
+};
+
 union placesRet switch (int err) {
     case 0:
-        placesLLNode *airports;
+        placesResults results;
     default:
         void; /* error occured, nothing returned */
 };

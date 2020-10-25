@@ -6,6 +6,7 @@
 
 #include "places.h"
 #include <string.h>
+#include <errno.h>
 
 #define NEW_STRUCT(s) (s *)malloc(sizeof(s))
 #define NEW_STRING(s) (char *)malloc(strlen(s)+1)
@@ -33,19 +34,31 @@ void disconnectFromClient(CLIENT *clnt, placesRet *result);
 int
 main (int argc, char *argv[])
 {
+    // perform query
     cmdInput *request = parseCmdLineInput(argc, argv);
 	CLIENT *clnt = connectToClient(request->host);
 	placesRet *result = findAirportsNearCity(clnt, request->location);
 
-    // print places results
-    placesLLNode *curr = (result->placesRet_u).airports;
-    while (curr != NULL) {
-        printf("Code: %s  ", curr->airport->code);
-        printf("Name: %s  ", curr->airport->name);
-        printf("Distance: %0.2f\n", curr->airport->distance);
-        curr = curr->next;
+    // print results
+    char *city, *state;
+    placesLLNode *curr = (result->placesRet_u).results.airports;
+    location location = (result->placesRet_u).results.location;
+    if ((errno = result->err) == 0) {
+        printf("%s, %s: ", location.city, location.state);
+        printf("%.6f, %.6f\n", location.latitude, location.longitude);
+        while (curr != NULL) {
+            city = strtok(strdup(curr->airport->name), ",");
+            state = strtok(NULL, ",");
+            printf("code=%s, ", curr->airport->code);
+            printf("name=%s, state=%s ", city, state);
+            printf("distance:%.2f miles\n", curr->airport->distance);
+            curr = curr->next;
+        }
+    } else {
+        perror("ERROR");
     }
 
+    // end query
     disconnectFromClient(clnt, result);
     exit(0);
 }
