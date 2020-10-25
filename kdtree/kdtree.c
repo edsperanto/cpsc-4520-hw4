@@ -80,6 +80,20 @@ nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_di
     nearestNeighbor(p_dir < 0 ? node->right : node->left, lat, lon, nn, nn_dist);
 }
 
+void 
+printKdTree(kdNode *node, int depth) 
+{
+    airport *a;
+    if (node != NULL) {
+        if (node->airport != NULL) {
+            a = node->airport;
+            printf("%d: %s %f %f %s\n", depth, a->code, a->latitude, a->longitude, a->name);
+        }
+        printKdTree(node->left, depth+1);
+        printKdTree(node->right, depth+1);
+    }
+}
+
 double
 distance(double lat1, double lon1, double lat2, double lon2, char unit)
 {

@@ -18,14 +18,14 @@
 airportsLLNode * testLL();
 
 int isEmpty(const char *str);
-airport * generateAirport(char *line);
+void generateAirport(char *line, airport *newAirport);
 void readAirportColumn(int col, char *line, char *cpy);
 int skipToStartOfColumn(int col, char *line);
 
 airportsRet *
 airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 {
-    static airport *airports[NUM_ENTRIES];
+    static airport *airports = NULL;
     static kdTree *kd = NULL;
 	static airportsRet result;
 
@@ -39,7 +39,7 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     printf("latitude: %0.2f   longitude: %0.2f\n", argp->latitude, argp->longitude);
 
     // generate k-d tree from airports file
-    if (kd == NULL) {
+    if (airports == NULL) {
 
         // load file
         char *airportsFile = "data/airport-locations.txt";
@@ -51,24 +51,22 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 
         // read file
         char line[LINE_SIZE];
+        airports = (airport *)malloc(sizeof(airport)*NUM_ENTRIES);
         fgets(line, sizeof(line), fp); // ignore first line
         for (int i = 0; fgets(line, sizeof(line), fp) != NULL; ) {
             if (!isEmpty(line)) {
-                airports[i++] = generateAirport(line);
+                generateAirport(line, airports+i++);
             }
         }
 
-        // close file
+        // close file and generate kd tree
         fclose(fp);
+        kd = generateKdTree(airports, NUM_ENTRIES);
 
     }
 
-    // check if airports loaded
-    airport *a;
-    for (int i = 0; i < NUM_ENTRIES; i++) {
-        a = airports[i];
-        printf("%s %f %f %s\n", a->code, a->latitude, a->longitude, a->name);
-    }
+    // check if airports loaded in k-d tree
+    printKdTree(kd->root, 1);
 
     // return test payload
     result.airportsRet_u.airports = testLL();
@@ -101,11 +99,10 @@ isEmpty(const char *str)
     return ch == '\0';
 }
 
-airport *
-generateAirport(char *line)
+void
+generateAirport(char *line, airport *newAirport)
 {
     char code[4], lat[8], lon[8], city[50];
-    airport *newAirport = NEW_STRUCT(airport);
     readAirportColumn(1, line, code);
     readAirportColumn(2, line, lat);
     readAirportColumn(3, line, lon);
@@ -115,7 +112,6 @@ generateAirport(char *line)
     newAirport->latitude = atof(lat);
     newAirport->longitude = atof(lon);
     newAirport->distance = 0;
-    return newAirport;
 }
 
 void
