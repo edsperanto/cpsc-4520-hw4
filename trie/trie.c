@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 #include "trie.h"
 
 struct trie_node *trie_make_node(const char letter) {
@@ -90,7 +91,7 @@ void trie_add_entry(struct trie *const trie, const char *str, const void *const 
   else if (node == NULL) {
     struct trie_node *root_level_tail = trie_level_get_tail(trie->root);
     root_level_tail->next = trie_make_node(*str++);
-    node = trie->root->next;
+    node = root_level_tail->next;
   }
   else if (node->down != NULL) {
     // TODO: smarter level insertion

@@ -4,6 +4,8 @@
  * as a guideline for developing your own functions.
  */
 
+#include <ctype.h>
+
 #include "places.h"
 #include "airports.h"
 #include "./trie/trie.h"
@@ -41,39 +43,58 @@ void print_paths(const struct trie_node *const node, int pos) {
   }
 }
 
+
+#define NUM_ENTRIES (25375)
 // places server main function
 placesRet *
 airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
 {
+    static char **strarr;
+    static struct trie trie;
 	static placesRet result;
 
     // initialize server function
     // xdr_free((xdrproc_t)xdr_placesRet, &result);
     result.err = 0;
-
-    // load places file
-    char *placesFile = "data/places2k.txt";
-    FILE *fp = fopen(placesFile, "r");
-    if (fp == NULL) {
-        printf("Could not open file %s\n", placesFile);
-        exit(1);
+    
+    if (strarr == NULL) {
+        char *placesFile = "data/places2k.txt";
+        FILE *fp = fopen(placesFile, "r");
+        if (fp == NULL) {
+            printf("Could not open file %s\n", placesFile);
+            exit(1);
+        }
+        strarr = malloc((sizeof *strarr) * NUM_ENTRIES);
+        trie = (struct trie){ .root = NULL };
+        char line[256], state[3], city[65], latitude[11], longitude[12];
+        int i = 0;
+        while (fgets(line, sizeof(line), fp) != NULL) {
+            SUBSTR(line, state, 1, 2);
+            SUBSTR(line, city, 10, 73);
+            /*
+            int j = sizeof(city) - 1;
+            while (!isalpha(city[j])) {
+                city[j--] = '\0';
+            }
+            */
+            SUBSTR(line, latitude, 144, 153);
+            SUBSTR(line, longitude, 154, 164);
+            // printf("    State: %s\n", state);
+            // printf("    City: %s|\n", city);
+            // printf("    Latitude: %s\n", latitude);
+            // printf("    Longitude: %s\n", longitude);
+            strarr[i++] = strdup(city);
+            trie_add_entry(&trie, city, NULL);
+        }
+        for (i = 0; i < NUM_ENTRIES; i++) {
+            struct trie_search_result search = trie_search(&trie, strarr[i]);
+            if (*(search.rest) != '\0') {
+                printf("FAIL: %s\n");
+            }
+        }
     }
 
-    struct trie trie = { .root = NULL };
-    // read lines
-    char line[256], state[3], city[65], latitude[11], longitude[12];
-    while (fgets(line, sizeof(line), fp) != NULL) {
-        SUBSTR(line, state, 1, 2);
-        SUBSTR(line, city, 10, 73);
-        SUBSTR(line, latitude, 144, 153);
-        SUBSTR(line, longitude, 154, 164);
-        printf("    State: %s\n", state);
-        printf("    City: %s\n", city);
-        printf("    Latitude: %s\n", latitude);
-        printf("    Longitude: %s\n", longitude);
-        trie_add_entry(&trie, city, NULL);
-    }
-
+    /*
     // demonstrates that all (or at least a lot of..) entries are successfully added to trie
     print_paths(trie.root, 0);
     
@@ -92,6 +113,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     }
     // close file
     fclose(fp);
+    */
 
     // print payload from client
     printf("clientArg\n");
