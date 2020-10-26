@@ -1,19 +1,18 @@
 Team members
-- Edward Gao
-- Oleg Kovalenko
+- Edward Gao: IDL files, airports server
+- Oleg Kovalenko: client, places server
 
 Data Structures and Algorithms
 - trie
 - k-d tree
 
-
 Strengths
 - 
 
 Weaknesses
-- 
+- No
 
-Instructions
+Instructions to run
 - `$ make`
 - `$ ./places` in first terminal
 - `$ ./airports` in second terminal

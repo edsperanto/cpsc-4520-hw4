@@ -34,7 +34,6 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     // xdr_free((xdrproc_t)xdr_airportsRet, &result);
     result.err = 0;
 
-    perror("test\n");
     // generate k-d tree from airports file
     if (airports == NULL) {
 
@@ -63,17 +62,14 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 
     }
 
-    perror("test\n");
-    // check if airports loaded in k-d tree
-    // check if search works
+    // find k nearest neighbors
     kdNode *nearest[K];
     kNearestNeighbor(kd->root, K, argp->latitude, argp->longitude, nearest);
-    
-    perror("test\n");
+
+    // return results
     airport *ap_out = result.airportsRet_u.result.airports;
     for (int i = 0; i < K; i++) {
         airport *ap_in = nearest[i]->airport;
-        // ap_out[i] = *ap_in;
         ap_out[i] = (airport) {
             .latitude = ap_in->latitude,
             .longitude = ap_in->longitude,
@@ -85,35 +81,7 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
         for (int j = 0; j < 50; j++) {
             ap_out[i].name[j] = ap_in->name[j];
         }
-        printf("airport_in[%d].code = %s\n", i, ap_in->code);
-        printf("airport_in[%d].name = %s\n", i, ap_in->name);
-        printf("airport_in[%d].latitude = %f\n", i, ap_in->latitude);
-        printf("airport_in[%d].longitude = %f\n", i, ap_in->longitude);
-        printf("airport_in[%d].distance = %f\n", i, ap_in->distance);
-        printf("airport_out[%d].code = %s\n", i, ap_out->code);
-        printf("airport_out[%d].name = %s\n", i, ap_out->name);
-        printf("airport_out[%d].latitude = %f\n", i, ap_out->latitude);
-        printf("airport_out[%d].longitude = %f\n", i, ap_out->longitude);
-        printf("airport_out[%d].distance = %f\n", i, ap_out->distance);
     }
-
-    // return test payload
-    /*
-    result.airportsRet_u.airports = (airportsLLNode *)malloc(sizeof(airportsLLNode));
-    airportsLLNode *curr = result.airportsRet_u.airports;
-    for (int i = 0; i < K; i++) {
-        airport *newNode = (airport *)malloc(sizeof(airport));
-        newNode->code = nearest[i]->airport->code;
-        newNode->name = nearest[i]->airport->name;
-        newNode->latitude = nearest[i]->airport->latitude;
-        newNode->longitude = nearest[i]->airport->longitude;
-        curr->airport = newNode;
-        curr->next = (i == K-1) ? NULL : (airportsLLNode *)malloc(sizeof(airportsLLNode));
-        curr = curr->next;
-    }
-    */
-
-    printf("code = %s\n", result.airportsRet_u.result.airports[0].code);
 	return &result;
 }
 
