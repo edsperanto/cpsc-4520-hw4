@@ -151,18 +151,24 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     // query trie
     struct trie_search_result search = trie_search(&trie, key);
     free(key);
-
     struct location *query = search.last->data;
+
+    // bad query
+    if (search.last == NULL) {
+        result.err = 4;
+        return &result;
+    }
 
     // match the closest prefix
     while (query == NULL && search.last->down != NULL) {
         search.last = search.last->down;
-        query = search.last->data;
     }
-    
-    // return error if not found
-    if (query == NULL) {
-        result.err = 1;
+
+    // get query data if unambiguous
+    if (search.last->down == NULL && search.last->next == NULL) {   // unambiguous prefix
+        query = search.last->data;
+    } else {   // ambiguous prefix
+        result.err = 3;
         return &result;
     }
 

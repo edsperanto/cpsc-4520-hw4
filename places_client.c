@@ -56,6 +56,10 @@ main (int argc, char *argv[])
             printf("distance:%.2f miles\n", ap.distance);
 
         }
+    } else if (errno == 3) {
+        printf("ERROR: Location not found, please refine query\n");
+    } else if (errno == 4) {
+        printf("ERROR: Location not found, bad query\n");
     } else {
         perror("ERROR");
     }
