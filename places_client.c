@@ -40,7 +40,6 @@ main (int argc, char *argv[])
 	placesRet *result = findAirportsNearCity(clnt, request->location);
 
     // print results
-    // placesLLNode *curr = (result->placesRet_u).results.airports;
     if ((errno = result->err) == 0) {
         airportInfo *airports = (result->placesRet_u).results.airports;
         location location = (result->placesRet_u).results.location;
@@ -57,16 +56,6 @@ main (int argc, char *argv[])
             printf("distance:%.2f miles\n", ap.distance);
 
         }
-        /*
-        while (curr != NULL) {
-            city = strtok(strdup(curr->airport->name), ",");
-            state = strtok(NULL, ",");
-            printf("code=%s, ", curr->airport->code);
-            printf("name=%s, state=%s ", city, state);
-            printf("distance:%.2f miles\n", curr->airport->distance);
-            curr = curr->next;
-        }
-        */
     } else {
         perror("ERROR");
     }

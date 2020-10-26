@@ -31,7 +31,7 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 	static airportsRet result;
     
     // initialize server function
-    // xdr_free((xdrproc_t)xdr_airportsRet, &result);
+    xdr_free((xdrproc_t)xdr_airportsRet, &result);
     result.err = 0;
 
     // generate k-d tree from airports file
@@ -101,11 +101,9 @@ generateAirport(char *line, airport *newAirport)
     readAirportColumn(2, line, lat);
     readAirportColumn(3, line, lon);
     readAirportColumn(4, line, city);
-    // CPY_STRING(newAirport->code, code);
     for (int i = 0; i < 4; i++) {
         newAirport->code[i] = code[i];
     }
-    // CPY_STRING(newAirport->name, city);
     for (int i = 0; i < 50; i++) {
         newAirport->name[i] = city[i];
     }

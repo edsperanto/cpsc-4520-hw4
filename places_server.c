@@ -84,12 +84,6 @@ void read_file(struct location *locs, struct trie *trie) {
         str_trim_end(longitude, sizeof(longitude) - 1, isdigit, false);
         str_lower(state);
         str_lower(city);
-        // str_lower(latitude);
-        // str_lower(longitude);
-        // printf("    State: %s|\n", state);
-        // printf("    City: %s|\n", city);
-        // printf("    Latitude: %s|\n", latitude);
-        // printf("    Longitude: %s|\n", longitude);
         locs[i] = (struct location) {
             .latitude = atof(latitude),
             .longitude = atof(longitude),
@@ -103,14 +97,6 @@ void read_file(struct location *locs, struct trie *trie) {
         trie_add_entry(trie, city, locs + i);
         i++;
     }
-    /*
-    for (i = 0; i < NUM_ENTRIES; i++) {
-        struct trie_search_result search = trie_search(trie, locs[i].fullName);
-        if (*(search.rest) != '\0') {
-            printf("FAIL\n");
-        }
-    }
-    */
     fclose(fp);
 }
 
@@ -124,7 +110,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
 
     (void)rqstp; // removes compilation warning
     // initialize server function
-    // xdr_free((xdrproc_t)xdr_placesRet, &result);
+    xdr_free((xdrproc_t)xdr_placesRet, &result);
     result.err = 0;
     
     // populate trie if it dne
