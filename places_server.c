@@ -76,8 +76,8 @@ void read_file(struct location *locs, struct trie *trie) {
     while (fgets(line, sizeof(line), fp) != NULL) {
         SUBSTR(line, state, 1, 2);
         SUBSTR(line, city, 10, 73);
-        SUBSTR(line, latitude, 145, 153);
-        SUBSTR(line, longitude, 155, 164);
+        SUBSTR(line, latitude, 144, 153);
+        SUBSTR(line, longitude, 154, 164);
         str_trim_end(state, sizeof(state) - 1, isalpha, false);
         str_trim_end(city, sizeof(city) - 1, isalpha, false);
         str_trim_end(latitude, sizeof(latitude) - 1, isdigit, false);
