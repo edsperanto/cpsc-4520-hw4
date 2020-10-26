@@ -5,6 +5,7 @@ Team members
 Data Structures and Algorithms
 - trie
 - k-d tree
+- k-nearest-neighbors search using k-d tree
 
 Strengths
 - 
