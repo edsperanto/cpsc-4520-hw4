@@ -105,9 +105,6 @@ void read_file(struct location *locs, struct trie *trie) {
             key[i] = city[i - stateLen];
         }
         key[size] = '\0';
-        if (strcmp(state, "ny") == 0) {
-            perror(key);
-        }
         trie_add_entry(trie, key, locs + i);
         free(key);
 
@@ -162,6 +159,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     // match the closest prefix
     while (query == NULL && search.last->down != NULL) {
         search.last = search.last->down;
+        if (search.last->next != NULL) break;
     }
 
     // get query data if unambiguous
