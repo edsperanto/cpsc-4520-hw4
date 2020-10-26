@@ -15,14 +15,8 @@ struct placesArg {
     double longitude;
 };
 
-struct airportsLLNode {
-    struct airport *airport;
-    struct airportsLLNode *next;
-};
-
 union airportsRet switch (int err) {
     case 0:
-        /* airportsLLNode *airports; */
         airportsResults result;
     default:
         void; /* error occured, nothing returned */

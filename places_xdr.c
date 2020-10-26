@@ -58,18 +58,6 @@ xdr_airportInfo (XDR *xdrs, airportInfo *objp)
 }
 
 bool_t
-xdr_placesLLNode (XDR *xdrs, placesLLNode *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_pointer (xdrs, (char **)&objp->airport, sizeof (airportInfo), (xdrproc_t) xdr_airportInfo))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->next, sizeof (placesLLNode), (xdrproc_t) xdr_placesLLNode))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
 xdr_placesResults (XDR *xdrs, placesResults *objp)
 {
 	register int32_t *buf;

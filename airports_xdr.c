@@ -51,18 +51,6 @@ xdr_placesArg (XDR *xdrs, placesArg *objp)
 }
 
 bool_t
-xdr_airportsLLNode (XDR *xdrs, airportsLLNode *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_pointer (xdrs, (char **)&objp->airport, sizeof (airport), (xdrproc_t) xdr_airport))
-		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->next, sizeof (airportsLLNode), (xdrproc_t) xdr_airportsLLNode))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
 xdr_airportsRet (XDR *xdrs, airportsRet *objp)
 {
 	register int32_t *buf;

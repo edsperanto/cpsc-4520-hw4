@@ -22,9 +22,6 @@
 
 #define NUM_ENTRIES (25375)
 
-// function declarations
-placesLLNode * testLL();
-
 // function declarations for processing RPC call
 airportsRet * findAirportsNearCoord(CLIENT *clnt, placesArg *coordinate);
 CLIENT * connectToClient(char *host);

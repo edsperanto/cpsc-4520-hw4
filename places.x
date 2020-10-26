@@ -18,11 +18,6 @@ struct airportInfo {
     double distance;
 };
 
-struct placesLLNode {
-    struct airportInfo *airport;
-    struct placesLLNode *next;
-};
-
 struct placesResults {
     struct location location;
     /* struct placesLLNode *airports; */

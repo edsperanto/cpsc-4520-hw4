@@ -16,8 +16,6 @@
 #define IS_SPACE(ch) (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
 #define IS_ENDING(ch) (ch == '\n' || ch == '\r' || ch == '\0')
 
-airportsLLNode * testLL();
-
 int isEmpty(const char *str);
 void generateAirport(char *line, airport *newAirport);
 void readAirportColumn(int col, char *line, char *cpy);

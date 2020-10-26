@@ -34,12 +34,6 @@ struct placesArg {
 };
 typedef struct placesArg placesArg;
 
-struct airportsLLNode {
-	struct airport *airport;
-	struct airportsLLNode *next;
-};
-typedef struct airportsLLNode airportsLLNode;
-
 struct airportsRet {
 	int err;
 	union {
@@ -70,14 +64,12 @@ extern int airports_prog_1_freeresult ();
 extern  bool_t xdr_airport (XDR *, airport*);
 extern  bool_t xdr_airportsResults (XDR *, airportsResults*);
 extern  bool_t xdr_placesArg (XDR *, placesArg*);
-extern  bool_t xdr_airportsLLNode (XDR *, airportsLLNode*);
 extern  bool_t xdr_airportsRet (XDR *, airportsRet*);
 
 #else /* K&R C */
 extern bool_t xdr_airport ();
 extern bool_t xdr_airportsResults ();
 extern bool_t xdr_placesArg ();
-extern bool_t xdr_airportsLLNode ();
 extern bool_t xdr_airportsRet ();
 
 #endif /* K&R C */

@@ -37,12 +37,6 @@ struct airportInfo {
 };
 typedef struct airportInfo airportInfo;
 
-struct placesLLNode {
-	struct airportInfo *airport;
-	struct placesLLNode *next;
-};
-typedef struct placesLLNode placesLLNode;
-
 struct placesResults {
 	struct location location;
 	airportInfo airports[5];
@@ -79,7 +73,6 @@ extern int places_prog_1_freeresult ();
 extern  bool_t xdr_location (XDR *, location*);
 extern  bool_t xdr_clientArg (XDR *, clientArg*);
 extern  bool_t xdr_airportInfo (XDR *, airportInfo*);
-extern  bool_t xdr_placesLLNode (XDR *, placesLLNode*);
 extern  bool_t xdr_placesResults (XDR *, placesResults*);
 extern  bool_t xdr_placesRet (XDR *, placesRet*);
 
@@ -87,7 +80,6 @@ extern  bool_t xdr_placesRet (XDR *, placesRet*);
 extern bool_t xdr_location ();
 extern bool_t xdr_clientArg ();
 extern bool_t xdr_airportInfo ();
-extern bool_t xdr_placesLLNode ();
 extern bool_t xdr_placesResults ();
 extern bool_t xdr_placesRet ();
 

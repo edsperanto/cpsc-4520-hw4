@@ -43,8 +43,8 @@ AIRPORTS_OBJECTS = $(AIRPORTS_OBJECTS_SVC) $(KD_OBJECTS)
 # Compiler flags
 
 CFLAGS += -g -I /usr/include/tirpc
-# LDLIBS += -ltirpc
-LDLIBS += -lnsl
+LDLIBS += -ltirpc
+# LDLIBS += -lnsl
 RPCGENFLAGS = 
 
 
