@@ -1,6 +1,6 @@
 struct location {
-    string city<>;
-    string state<>;
+    char state[4];
+    char city[50];
     double latitude;
     double longitude;
 };
@@ -25,7 +25,8 @@ struct placesLLNode {
 
 struct placesResults {
     struct location location;
-    struct placesLLNode *airports;
+    /* struct placesLLNode *airports; */
+    airportInfo airports[5];
 };
 
 union placesRet switch (int err) {

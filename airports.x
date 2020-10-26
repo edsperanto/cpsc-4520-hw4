@@ -1,9 +1,13 @@
 struct airport {
-    string code<>;
-    string name<>;
+    char code[4];
+    char name[50];
     double latitude;
     double longitude;
     double distance;
+};
+
+struct airportsResults {
+    airport airports[5];
 };
 
 struct placesArg {
@@ -18,7 +22,8 @@ struct airportsLLNode {
 
 union airportsRet switch (int err) {
     case 0:
-        airportsLLNode *airports;
+        /* airportsLLNode *airports; */
+        airportsResults result;
     default:
         void; /* error occured, nothing returned */
 };

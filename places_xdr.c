@@ -10,9 +10,12 @@ xdr_location (XDR *xdrs, location *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_string (xdrs, &objp->city, ~0))
+	int i;
+	 if (!xdr_vector (xdrs, (char *)objp->state, 4,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
-	 if (!xdr_string (xdrs, &objp->state, ~0))
+	 if (!xdr_vector (xdrs, (char *)objp->city, 50,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->latitude))
 		 return FALSE;
@@ -68,9 +71,11 @@ xdr_placesResults (XDR *xdrs, placesResults *objp)
 {
 	register int32_t *buf;
 
+	int i;
 	 if (!xdr_location (xdrs, &objp->location))
 		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->airports, sizeof (placesLLNode), (xdrproc_t) xdr_placesLLNode))
+	 if (!xdr_vector (xdrs, (char *)objp->airports, 5,
+		sizeof (airportInfo), (xdrproc_t) xdr_airportInfo))
 		 return FALSE;
 	return TRUE;
 }

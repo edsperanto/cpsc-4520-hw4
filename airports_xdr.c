@@ -10,15 +10,30 @@ xdr_airport (XDR *xdrs, airport *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_string (xdrs, &objp->code, ~0))
+	int i;
+	 if (!xdr_vector (xdrs, (char *)objp->code, 4,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
-	 if (!xdr_string (xdrs, &objp->name, ~0))
+	 if (!xdr_vector (xdrs, (char *)objp->name, 50,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->latitude))
 		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->longitude))
 		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->distance))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
+xdr_airportsResults (XDR *xdrs, airportsResults *objp)
+{
+	register int32_t *buf;
+
+	int i;
+	 if (!xdr_vector (xdrs, (char *)objp->airports, 5,
+		sizeof (airport), (xdrproc_t) xdr_airport))
 		 return FALSE;
 	return TRUE;
 }
@@ -56,7 +71,7 @@ xdr_airportsRet (XDR *xdrs, airportsRet *objp)
 		 return FALSE;
 	switch (objp->err) {
 	case 0:
-		 if (!xdr_pointer (xdrs, (char **)&objp->airportsRet_u.airports, sizeof (airportsLLNode), (xdrproc_t) xdr_airportsLLNode))
+		 if (!xdr_airportsResults (xdrs, &objp->airportsRet_u.result))
 			 return FALSE;
 		break;
 	default:

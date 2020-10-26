@@ -29,12 +29,12 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     static airport *airports = NULL;
     static kdTree *kd = NULL;
 	static airportsRet result;
-
+    
     // initialize server function
     // xdr_free((xdrproc_t)xdr_airportsRet, &result);
     result.err = 0;
-    result.airportsRet_u.airports = NULL;
 
+    perror("test\n");
     // generate k-d tree from airports file
     if (airports == NULL) {
 
@@ -52,7 +52,8 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
         fgets(line, sizeof(line), fp); // ignore first line
         for (int i = 0; fgets(line, sizeof(line), fp) != NULL; ) {
             if (!isEmpty(line)) {
-                generateAirport(line, airports+i++);
+                generateAirport(line, airports + i);
+                i++;
             }
         }
 
@@ -62,13 +63,43 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
 
     }
 
+    perror("test\n");
     // check if airports loaded in k-d tree
     // check if search works
     kdNode *nearest[K];
     double *nearest_dist[K];
     kNearestNeighbor(kd->root, K, argp->latitude, argp->longitude, nearest, nearest_dist);
+    
+    perror("test\n");
+    airport *ap_out = result.airportsRet_u.result.airports;
+    for (int i = 0; i < K; i++) {
+        airport *ap_in = nearest[i]->airport;
+        // ap_out[i] = *ap_in;
+        ap_out[i] = (airport) {
+            .latitude = ap_in->latitude,
+            .longitude = ap_in->longitude,
+            .distance = ap_in->distance,
+        };
+        for (int j = 0; j < 4; j++) {
+            ap_out[i].code[j] = ap_in->code[j];
+        }
+        for (int j = 0; j < 50; j++) {
+            ap_out[i].name[j] = ap_in->name[j];
+        }
+        printf("airport_in[%d].code = %s\n", i, ap_in->code);
+        printf("airport_in[%d].name = %s\n", i, ap_in->name);
+        printf("airport_in[%d].latitude = %f\n", i, ap_in->latitude);
+        printf("airport_in[%d].longitude = %f\n", i, ap_in->longitude);
+        printf("airport_in[%d].distance = %f\n", i, ap_in->distance);
+        printf("airport_out[%d].code = %s\n", i, ap_out->code);
+        printf("airport_out[%d].name = %s\n", i, ap_out->name);
+        printf("airport_out[%d].latitude = %f\n", i, ap_out->latitude);
+        printf("airport_out[%d].longitude = %f\n", i, ap_out->longitude);
+        printf("airport_out[%d].distance = %f\n", i, ap_out->distance);
+    }
 
     // return test payload
+    /*
     result.airportsRet_u.airports = (airportsLLNode *)malloc(sizeof(airportsLLNode));
     airportsLLNode *curr = result.airportsRet_u.airports;
     for (int i = 0; i < K; i++) {
@@ -81,7 +112,9 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
         curr->next = (i == K-1) ? NULL : (airportsLLNode *)malloc(sizeof(airportsLLNode));
         curr = curr->next;
     }
+    */
 
+    printf("code = %s\n", result.airportsRet_u.result.airports[0].code);
 	return &result;
 }
 
@@ -101,8 +134,14 @@ generateAirport(char *line, airport *newAirport)
     readAirportColumn(2, line, lat);
     readAirportColumn(3, line, lon);
     readAirportColumn(4, line, city);
-    CPY_STRING(newAirport->code, code);
-    CPY_STRING(newAirport->name, city);
+    // CPY_STRING(newAirport->code, code);
+    for (int i = 0; i < 4; i++) {
+        newAirport->code[i] = code[i];
+    }
+    // CPY_STRING(newAirport->name, city);
+    for (int i = 0; i < 50; i++) {
+        newAirport->name[i] = city[i];
+    }
     newAirport->latitude = atof(lat);
     newAirport->longitude = atof(lon);
     newAirport->distance = 0;

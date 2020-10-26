@@ -15,13 +15,18 @@ extern "C" {
 
 
 struct airport {
-	char *code;
-	char *name;
+	char code[4];
+	char name[50];
 	double latitude;
 	double longitude;
 	double distance;
 };
 typedef struct airport airport;
+
+struct airportsResults {
+	airport airports[5];
+};
+typedef struct airportsResults airportsResults;
 
 struct placesArg {
 	double latitude;
@@ -38,7 +43,7 @@ typedef struct airportsLLNode airportsLLNode;
 struct airportsRet {
 	int err;
 	union {
-		airportsLLNode *airports;
+		airportsResults result;
 	} airportsRet_u;
 };
 typedef struct airportsRet airportsRet;
@@ -63,12 +68,14 @@ extern int airports_prog_1_freeresult ();
 
 #if defined(__STDC__) || defined(__cplusplus)
 extern  bool_t xdr_airport (XDR *, airport*);
+extern  bool_t xdr_airportsResults (XDR *, airportsResults*);
 extern  bool_t xdr_placesArg (XDR *, placesArg*);
 extern  bool_t xdr_airportsLLNode (XDR *, airportsLLNode*);
 extern  bool_t xdr_airportsRet (XDR *, airportsRet*);
 
 #else /* K&R C */
 extern bool_t xdr_airport ();
+extern bool_t xdr_airportsResults ();
 extern bool_t xdr_placesArg ();
 extern bool_t xdr_airportsLLNode ();
 extern bool_t xdr_airportsRet ();

@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
 #include "places.h"
@@ -83,18 +84,22 @@ void read_file(struct location *locs, struct trie *trie) {
         str_trim_end(longitude, sizeof(longitude) - 1, isdigit, false);
         str_lower(state);
         str_lower(city);
-        str_lower(latitude);
-        str_lower(longitude);
+        // str_lower(latitude);
+        // str_lower(longitude);
         // printf("    State: %s|\n", state);
         // printf("    City: %s|\n", city);
         // printf("    Latitude: %s|\n", latitude);
         // printf("    Longitude: %s|\n", longitude);
         locs[i] = (struct location) {
-            .city = strdup(city),
-            .state = strdup(state),
             .latitude = atof(latitude),
             .longitude = atof(longitude),
         };
+        for (int j = 0; j < 4; j++) {
+            locs[i].state[j] = state[j];
+        }
+        for (int j = 0; j < 50; j++) {
+            locs[i].city[j] = city[j];
+        }
         trie_add_entry(trie, city, locs + i);
         i++;
     }
@@ -165,36 +170,19 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
 
     // return test payload
     result.placesRet_u.results.location = *query;
-    result.placesRet_u.results.airports = (placesLLNode *)malloc(sizeof(placesLLNode));
-    placesLLNode *curr = result.placesRet_u.results.airports;
-    while (curr != NULL) {
-        airportInfo *newNode = (airportInfo *)malloc(sizeof(airportInfo));
-        newNode->code = curr->airport->code;
-        newNode->name = curr->airport->name;
-        newNode->latitude = curr->airport->latitude;
-        newNode->longitude = curr->airport->longitude;
-        curr->airport = newNode;
-        curr = curr->next;
-    }
-
-	return &result;
-}
-
-placesLLNode *
-testLL() 
-{
-    placesLLNode *LL = NEW_STRUCT(placesLLNode);
-    placesLLNode *curr = LL;
     for (int i = 0; i < 5; i++) {
-        airportInfo *newNode = NEW_STRUCT(airportInfo);
-        newNode->code = "code";
-        newNode->name = "name";
-        newNode->distance = 3.14;
-        curr->airport = newNode;
-        curr->next = (i == 4) ? NULL : NEW_STRUCT(placesLLNode);
-        curr = curr->next;
+        struct airport *airport_in = &(airportsResult->airportsRet_u.result.airports[i]);
+        printf("airport_in[%d].code = %s\n", i, airport_in->code);
+        printf("airport_in[%d].name = %s\n", i, airport_in->name);
+        printf("airport_in[%d].latitude = %f\n", i, airport_in->latitude);
+        printf("airport_in[%d].longitude = %f\n", i, airport_in->longitude);
+        printf("airport_in[%d].distance = %f\n", i, airport_in->distance);
+        struct airportInfo *airport_out = &(result.placesRet_u.results.airports[i]);
+        *airport_out = *(airportInfo *)airport_in;
     }
-    return LL;
+
+    printf("code = %s\n", airportsResult->airportsRet_u.result.airports[0].code);
+	return &result;
 }
 
 airportsRet *
@@ -229,7 +217,7 @@ void
 disconnectFromClient(CLIENT *clnt, airportsRet *result) 
 {
     #ifndef	DEBUG
-    clnt_freeres(clnt, (xdrproc_t)xdr_airportsRet, result);
+    clnt_freeres(clnt, (xdrproc_t)xdr_airportsRet, (void *)result);
 	clnt_destroy(clnt);
     #endif	 /* DEBUG */
 }

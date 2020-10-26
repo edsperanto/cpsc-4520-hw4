@@ -15,8 +15,8 @@ extern "C" {
 
 
 struct location {
-	char *city;
-	char *state;
+	char state[4];
+	char city[50];
 	double latitude;
 	double longitude;
 };
@@ -45,7 +45,7 @@ typedef struct placesLLNode placesLLNode;
 
 struct placesResults {
 	struct location location;
-	struct placesLLNode *airports;
+	airportInfo airports[5];
 };
 typedef struct placesResults placesResults;
 
