@@ -11,8 +11,8 @@ struct clientArg {
 };
 
 struct airportInfo {
-    string code<>;
-    string name<>;
+    char code[4];
+    char name[50];
     double latitude;
     double longitude;
     double distance;

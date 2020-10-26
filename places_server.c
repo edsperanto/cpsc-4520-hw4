@@ -170,18 +170,26 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
 
     // return test payload
     result.placesRet_u.results.location = *query;
+    struct airport *airport_in = airportsResult->airportsRet_u.result.airports;
+    struct airportInfo *airport_out = result.placesRet_u.results.airports;
     for (int i = 0; i < 5; i++) {
-        struct airport *airport_in = &(airportsResult->airportsRet_u.result.airports[i]);
         printf("airport_in[%d].code = %s\n", i, airport_in->code);
         printf("airport_in[%d].name = %s\n", i, airport_in->name);
         printf("airport_in[%d].latitude = %f\n", i, airport_in->latitude);
         printf("airport_in[%d].longitude = %f\n", i, airport_in->longitude);
         printf("airport_in[%d].distance = %f\n", i, airport_in->distance);
-        struct airportInfo *airport_out = &(result.placesRet_u.results.airports[i]);
         *airport_out = *(airportInfo *)airport_in;
+        /*
+        for (int j = 0; j < 4; j++) {
+            airport_out[i].code[j] = airport_in[i].code[j];
+        }
+        for (int j = 0; j < 4; j++) {
+            airport_out[i].code[j] = airport_in[i].code[j];
+        }
+        */
     }
 
-    printf("code = %s\n", airportsResult->airportsRet_u.result.airports[0].code);
+    // printf("code = %s\n", airportsResult->airportsRet_u.result.airports[0].code);
 	return &result;
 }
 

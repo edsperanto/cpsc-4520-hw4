@@ -41,9 +41,12 @@ xdr_airportInfo (XDR *xdrs, airportInfo *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_string (xdrs, &objp->code, ~0))
+	int i;
+	 if (!xdr_vector (xdrs, (char *)objp->code, 4,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
-	 if (!xdr_string (xdrs, &objp->name, ~0))
+	 if (!xdr_vector (xdrs, (char *)objp->name, 50,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->latitude))
 		 return FALSE;

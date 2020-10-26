@@ -29,8 +29,8 @@ struct clientArg {
 typedef struct clientArg clientArg;
 
 struct airportInfo {
-	char *code;
-	char *name;
+	char code[4];
+	char name[50];
 	double latitude;
 	double longitude;
 	double distance;
