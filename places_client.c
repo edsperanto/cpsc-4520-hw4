@@ -48,8 +48,12 @@ main (int argc, char *argv[])
         printf("%.6f, %.6f\n", location.latitude, location.longitude);
         for (int i = 0; i < 5; i++) {
             airportInfo ap = airports[i];
+            char *comma = strchr(ap.name, ',');
+            char *state = comma + 1;
+            char *city = ap.name;
+            *comma = '\0';
             printf("code=%s, ", ap.code);
-            printf("name=%s, state=%s ", ap.name, ap.code);
+            printf("name=%s, state=%s ", city, state);
             printf("distance:%.2f miles\n", ap.distance);
 
         }
