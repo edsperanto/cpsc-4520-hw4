@@ -40,12 +40,20 @@ main (int argc, char *argv[])
 	placesRet *result = findAirportsNearCity(clnt, request->location);
 
     // print results
-    char *city, *state;
-    placesLLNode *curr = (result->placesRet_u).results.airports;
-    location location = (result->placesRet_u).results.location;
+    // placesLLNode *curr = (result->placesRet_u).results.airports;
     if ((errno = result->err) == 0) {
+        airportInfo *airports = (result->placesRet_u).results.airports;
+        location location = (result->placesRet_u).results.location;
         printf("%s, %s: ", location.city, location.state);
         printf("%.6f, %.6f\n", location.latitude, location.longitude);
+        for (int i = 0; i < 5; i++) {
+            airportInfo ap = airports[i];
+            printf("code=%s, ", ap.code);
+            printf("name=%s, state=%s ", ap.name, ap.code);
+            printf("distance:%.2f miles\n", ap.distance);
+
+        }
+        /*
         while (curr != NULL) {
             city = strtok(strdup(curr->airport->name), ",");
             state = strtok(NULL, ",");
@@ -54,6 +62,7 @@ main (int argc, char *argv[])
             printf("distance:%.2f miles\n", curr->airport->distance);
             curr = curr->next;
         }
+        */
     } else {
         perror("ERROR");
     }

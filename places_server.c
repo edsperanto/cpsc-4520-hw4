@@ -178,7 +178,7 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
         printf("airport_in[%d].latitude = %f\n", i, airport_in->latitude);
         printf("airport_in[%d].longitude = %f\n", i, airport_in->longitude);
         printf("airport_in[%d].distance = %f\n", i, airport_in->distance);
-        *airport_out = *(airportInfo *)airport_in;
+        *(airport_out + i) = *(airportInfo *)(airport_in + i);
         /*
         for (int j = 0; j < 4; j++) {
             airport_out[i].code[j] = airport_in[i].code[j];
