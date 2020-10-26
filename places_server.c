@@ -94,7 +94,23 @@ void read_file(struct location *locs, struct trie *trie) {
         for (int j = 0; j < 50; j++) {
             locs[i].city[j] = city[j];
         }
-        trie_add_entry(trie, city, locs + i);
+        int stateLen = strlen(state);
+        int cityLen = strlen(city);
+        int size = stateLen + cityLen;
+        char *key = malloc(size + 1);
+        for (int i = 0; i < stateLen; i++) {
+            key[i] = state[i];
+        }
+        for (int i = stateLen; i < size; i++) {
+            key[i] = city[i - stateLen];
+        }
+        key[size] = '\0';
+        if (strcmp(state, "ny") == 0) {
+            perror(key);
+        }
+        trie_add_entry(trie, key, locs + i);
+        free(key);
+
         i++;
     }
     fclose(fp);
@@ -118,9 +134,24 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
         read_file(locs, &trie);
     }
     
+    // build key
+    int stateLen = strlen(argp->state);
+    int cityLen = strlen(argp->city);
+    int size = stateLen + cityLen;
+    char *key = malloc(size + 1);
+    for (int i = 0; i < stateLen; i++) {
+        key[i] = argp->state[i];
+    }
+    for (int i = stateLen; i < size; i++) {
+        key[i] = argp->city[i - stateLen];
+    }
+    key[size] = '\0';
+    str_lower(key);
+
     // query trie
-    str_lower(argp->city);
-    struct trie_search_result search = trie_search(&trie, argp->city);
+    struct trie_search_result search = trie_search(&trie, key);
+    free(key);
+
     struct location *query = search.last->data;
 
     // match the closest prefix
