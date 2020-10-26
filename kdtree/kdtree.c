@@ -104,7 +104,6 @@ kNearestNeighbor(kdNode *root, int k, double lat, double lon, kdNode *nn[])
         *nearest_dist = DBL_MAX;
         nearestNeighbor(node, lat, lon, &nearest, nearest_dist);
         if (nearest != NULL) {
-            printf("%f %f\n", nearest->airport->latitude, nearest->airport->longitude);
             nearest->visited = 1;
             nearest->airport->distance = *nearest_dist;
             nn[i] = nearest;

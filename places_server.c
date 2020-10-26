@@ -122,20 +122,18 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
     static struct trie trie;
 	static placesRet result;
 
-    (void)rqstp; // remove compilation warning (what is rqstp?)
+    (void)rqstp; // removes compilation warning
     // initialize server function
     // xdr_free((xdrproc_t)xdr_placesRet, &result);
     result.err = 0;
     
+    // populate trie if it dne
     if (trie.root == NULL) {
         read_file(locs, &trie);
     }
-    // print_paths((void *)&(trie.root), 0);
-
-    // print payload from client
-    printf("clientArg\n");
-    printf("city: %s   state: %s\n", argp->city, argp->state);
     
+    // query trie
+    str_lower(argp->city);
     struct trie_search_result search = trie_search(&trie, argp->city);
     struct location *query = search.last->data;
 
@@ -145,51 +143,28 @@ airports_near_city_1_svc(clientArg *argp, struct svc_req *rqstp)
         query = search.last->data;
     }
     
+    // return error if not found
     if (query == NULL) {
         result.err = 1;
         return &result;
     }
 
-    printf("query state: %s\n", query->state);
-    printf("query city: %s\n", query->city);
-    printf("query longitude: %f\n", query->longitude);
-    printf("query longitude: %f\n", query->latitude);
-
-    // test call airports server
+    // query airports server
     placesArg *coordinate = NEW_STRUCT(placesArg);
     coordinate->latitude = query->latitude;
     coordinate->longitude = query->longitude;
-
 	CLIENT *clnt = connectToClient("localhost");
     airportsRet *airportsResult = findAirportsNearCoord(clnt, coordinate);
 
-    // print airports result
-    printf("\n\n");
-
-    disconnectFromClient(clnt, airportsResult);
-
-    // return test payload
+    // return results
     result.placesRet_u.results.location = *query;
     struct airport *airport_in = airportsResult->airportsRet_u.result.airports;
     struct airportInfo *airport_out = result.placesRet_u.results.airports;
     for (int i = 0; i < 5; i++) {
-        printf("airport_in[%d].code = %s\n", i, airport_in->code);
-        printf("airport_in[%d].name = %s\n", i, airport_in->name);
-        printf("airport_in[%d].latitude = %f\n", i, airport_in->latitude);
-        printf("airport_in[%d].longitude = %f\n", i, airport_in->longitude);
-        printf("airport_in[%d].distance = %f\n", i, airport_in->distance);
         *(airport_out + i) = *(airportInfo *)(airport_in + i);
-        /*
-        for (int j = 0; j < 4; j++) {
-            airport_out[i].code[j] = airport_in[i].code[j];
-        }
-        for (int j = 0; j < 4; j++) {
-            airport_out[i].code[j] = airport_in[i].code[j];
-        }
-        */
     }
 
-    // printf("code = %s\n", airportsResult->airportsRet_u.result.airports[0].code);
+    disconnectFromClient(clnt, airportsResult);
 	return &result;
 }
 
