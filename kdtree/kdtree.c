@@ -26,6 +26,15 @@ cmpLongitude(const void *a_ptr, const void *b_ptr)
     return a.longitude < b.longitude ? -1 : a.longitude > b.longitude;
 }
 
+int 
+cmpDistance(const void *a_ptr, const void *b_ptr) 
+{
+    airport a = *(airport *)a_ptr;
+    airport b = *(airport *)b_ptr;
+    return a.distance - b.distance;
+    // return a.distance < b.distance ? -1 : a.distance > b.distance;
+}
+
 kdTree * 
 generateKdTree(airport *airports, int size) 
 {
@@ -70,31 +79,41 @@ nearestNeighbor(kdNode *node, double lat, double lon, kdNode **nn, double *nn_di
 	double p_dir = (node->dir ? lon : lat) - node->pos; // perpendicular direction
     double p_dist = distance(lat, lon, node->dir ? lat : node->pos, node->dir ? node->pos : lon, 'M'); // perpendicular distance
 	
-    if ((!*nn || dist < *nn_dist) && node->visited == 0) {
+    if (dist < *nn_dist && node->visited == 0) {
         *nn_dist = dist;
         *nn = node;
     }
 
     if (*nn_dist == 0) return ;
     nearestNeighbor(p_dir < 0 ? node->left : node->right, lat, lon, nn, nn_dist);
-    if (p_dist > *nn_dist) return ;
     nearestNeighbor(p_dir < 0 ? node->right : node->left, lat, lon, nn, nn_dist);
 }
 
 void
-kNearestNeighbor(kdNode *node, int k, double lat, double lon, kdNode *nn[], double *nn_dist[]) 
+kNearestNeighbor(kdNode *root, int k, double lat, double lon, kdNode *nn[]) 
 {
-    kdNode *nearest = NULL;
+    kdNode *node, *nearest;
     double *nearest_dist;
     for (int i = 0; i < k; i++) {
-        nearest_dist = (double *)malloc(sizeof(double));
-        nearestNeighbor(node, 16, 158, &nearest, nearest_dist);
-        nearest->visited = 1;
-        nn[i] = nearest;
-        nn_dist[i] = nearest_dist;
+        nn[i] = NULL;
     }
     for (int i = 0; i < k; i++) {
-        nn[i]->visited = 0;
+        node = root;
+        nearest = NULL;
+        nearest_dist = (double *)malloc(sizeof(double));
+        *nearest_dist = DBL_MAX;
+        nearestNeighbor(node, lat, lon, &nearest, nearest_dist);
+        if (nearest != NULL) {
+            printf("%f %f\n", nearest->airport->latitude, nearest->airport->longitude);
+            nearest->visited = 1;
+            nearest->airport->distance = *nearest_dist;
+            nn[i] = nearest;
+        }
+    }
+    for (int i = 0; i < k; i++) {
+        if (nn[i] != NULL) {
+            nn[i]->visited = 0;
+        }
     }
 }
 
