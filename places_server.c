@@ -22,9 +22,6 @@
 
 #define NUM_ENTRIES (25375)
 
-// function declarations
-placesLLNode * testLL();
-
 // function declarations for processing RPC call
 airportsRet * findAirportsNearCoord(CLIENT *clnt, placesArg *coordinate);
 CLIENT * connectToClient(char *host);
@@ -105,9 +102,6 @@ void read_file(struct location *locs, struct trie *trie) {
             key[i] = city[i - stateLen];
         }
         key[size] = '\0';
-        if (strcmp(state, "ny") == 0) {
-            perror(key);
-        }
         trie_add_entry(trie, key, locs + i);
         free(key);
 
