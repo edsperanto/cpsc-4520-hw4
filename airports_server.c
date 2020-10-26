@@ -67,8 +67,7 @@ airports_near_coord_1_svc(placesArg *argp, struct svc_req *rqstp)
     // check if airports loaded in k-d tree
     // check if search works
     kdNode *nearest[K];
-    double *nearest_dist[K];
-    kNearestNeighbor(kd->root, K, argp->latitude, argp->longitude, nearest, nearest_dist);
+    kNearestNeighbor(kd->root, K, argp->latitude, argp->longitude, nearest);
     
     perror("test\n");
     airport *ap_out = result.airportsRet_u.result.airports;
